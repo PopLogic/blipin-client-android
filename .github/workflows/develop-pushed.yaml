@@ -13,7 +13,9 @@ jobs:
   build:
     permissions:
       contents: read
-    runs-on: [ self-hosted, shang-MacBook ]
+    runs-on:
+      group: Blipin-Client
+      labels: [ self-hosted ]
 
     steps:
       - name: Checkout code
