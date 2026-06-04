@@ -15,7 +15,6 @@ jobs:
       contents: read
     runs-on:
       group: Blipin-Client
-      labels: [ self-hosted ]
 
     steps:
       - name: Checkout code
