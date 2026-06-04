@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "188732090178",
+    "project_id": "blipin-client-prod",
+    "storage_bucket": "blipin-client-prod.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:188732090178:android:f117ffcca089cc7b508adb",
+        "android_client_info": {
+          "package_name": "com.poplogic.blipin"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBs3h2nTfodyXJN5Xr1h__mC0clf7SBLGc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
