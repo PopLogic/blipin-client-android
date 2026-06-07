@@ -50,10 +50,10 @@ jobs:
 
       - name: Setup Firebase
         env:
-          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICE_JSON }}
+          GOOGLE_SERVICE_JSON: ${{ secrets.GOOGLE_SERVICE_JSON }}
           FIREBASE_CREDENTIALS_JSON: ${{ secrets.FIREBASE_CREDENTIALS_JSON }}
         run: |
-          echo "$GOOGLE_SERVICES_JSON" | base64 --decode > app/src/${{ env.DEPLOY_ENV }}/google-services.json
+          echo "$GOOGLE_SERVICE_JSON" | base64 --decode > app/src/${{ env.DEPLOY_ENV }}/google-services.json
           echo "$FIREBASE_CREDENTIALS_JSON" | base64 --decode > firebase_credentials.json
 
       - name: Setup Android Keystore
