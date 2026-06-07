@@ -30,10 +30,10 @@ platform :android do
     # You can also use other beta testing services here
   end
 
-  desc "Build and distribute stagingValidation AAB"
-    lane :staging_validation_aab do
+  desc "Build and distribute stagingValidation APK"
+    lane :staging_validation_apk do
       gradle(
-        task: "bundle",
+        task: "assemble",
         build_type: "validation",
         flavor: "staging"
       )
@@ -43,7 +43,7 @@ platform :android do
         service_credentials_file: ENV["FIREBASE_CREDENTIALS_JSON_PATH"],
         groups: "internal testers",
         release_notes: "CI build from develop branch",
-        apk_path: "app/build/outputs/bundle/stagingValidation/app-staging-validation.aab"
+        apk_path: "app/build/outputs/bundle/stagingValidation/app-staging-validation.apk"
       )
     end
 
