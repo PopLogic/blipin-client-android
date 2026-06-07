@@ -78,5 +78,5 @@ jobs:
       - name: Run Fastlane lane (AAB build + Firebase upload)
         run: bundle exec fastlane staging_validation_aab
         env:
-          FIREBASE_APP_ID: ${{ secrets.MATCH_PASSWORD }}
+          FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
           FIREBASE_CREDENTIALS_JSON_PATH: ${{ github.workspace }}/firebase_credentials.json
