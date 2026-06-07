@@ -34,8 +34,8 @@ platform :android do
     lane :staging_validation_aab do
       gradle(
         task: "bundle",
-        build_type: "Validation",
-        flavor: "Staging"
+        build_type: "validation",
+        flavor: "staging"
       )
 
       firebase_app_distribution(
