@@ -18,6 +18,7 @@ jobs:
     runs-on:
       group: Blipin-Client
       labels: [ self-hosted ]
+    environment: staging
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -54,10 +55,8 @@ jobs:
           FIREBASE_CREDENTIALS_JSON: ${{ secrets.FIREBASE_CREDENTIALS_JSON }}
         run: |
           mkdir -p app/src/${{ env.DEPLOY_ENV }}
-          echo "GOOGLE_SERVICE_JSON: $GOOGLE_SERVICE_JSON"
-          echo "FIREBASE_CREDENTIALS_JSON: $FIREBASE_CREDENTIALS_JSON"
           cat <<< "$GOOGLE_SERVICE_JSON" | base64 --decode > app/src/${{ env.DEPLOY_ENV }}/google-services.json
-          cat <<< "$FIREBASE_CREDENTIALS_JSON" | base64 --decode > firebase_credentials.json          echo "$FIREBASE_CREDENTIALS_JSON" | base64 --decode > firebase_credentials.json
+          cat <<< "$FIREBASE_CREDENTIALS_JSON" | base64 --decode > firebase_credentials.json
 
       - name: Setup Android Keystore
         env:
