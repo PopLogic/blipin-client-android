@@ -1,0 +1,80 @@
+name: Android CI/CD
+
+on:
+  push:
+    branches:
+      - develop
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DEPLOY_ENV: staging
+
+jobs:
+  build:
+    runs-on:
+      group: Blipin-Client
+      labels: [ self-hosted ]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure Android SDK
+        run: |
+          sdk_root="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-$HOME/Library/Android/sdk}}"
+          
+          if [[ ! -d "$sdk_root" ]]; then
+            echo "Android SDK not found at: $sdk_root" >&2
+            exit 1
+          fi
+          
+          echo "ANDROID_SDK_ROOT=$sdk_root" >> "$GITHUB_ENV"
+          echo "ANDROID_HOME=$sdk_root" >> "$GITHUB_ENV"
+          echo "$sdk_root/platform-tools" >> "$GITHUB_PATH"
+          echo "$sdk_root/emulator" >> "$GITHUB_PATH"
+
+      - name: Validate Gradle wrapper
+        uses: gradle/wrapper-validation-action@v1
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Setup Firebase
+        env:
+          GOOGLE_SERVICE_JSON: ${{ secrets.GOOGLE_SERVICE_JSON }}
+          FIREBASE_CREDENTIALS_JSON: ${{ secrets.FIREBASE_CREDENTIALS_JSON }}
+        run: |
+          echo "$GOOGLE_SERVICE_JSON" | base64 --decode > app/src/${{ env.DEPLOY_ENV }}/google-services.json
+          echo "$FIREBASE_CREDENTIALS_JSON" | base64 --decode > firebase_credentials.json
+
+      - name: Setup Android Keystore
+        env:
+          ANDROID_KEYSTORE_PATH: ${{ github.workspace }}/keystores/android_keystore.jks
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_VALIDATION_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_VALIDATION_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_VALIDATION_KEY_PASSWORD }}
+        run: |
+          mkdir -p keystores
+          echo "${{ secrets.ANDROID_VALIDATION_KEYSTORE_JKS }}" | base64 --decode > ${{ env.ANDROID_KEYSTORE_PATH }}
+          echo "storeFile=${{ env.ANDROID_KEYSTORE_PATH }}" > keystores/key.properties
+          echo "storePassword=${{ env.ANDROID_KEYSTORE_PASSWORD }}" >> keystores/key.properties
+          echo "keyPassword=${{ env.ANDROID_KEY_PASSWORD }}" >> keystores/key.properties
+          echo "keyAlias=${{ env.ANDROID_KEY_ALIAS }}" >> keystores/key.properties
+
+      - name: Install Fastlane
+        run: bundle install
+
+      - name: Run Fastlane lane (AAB build + Firebase upload)
+        run: bundle exec fastlane staging_validation_aab
+        env:
+          FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
+          FIREBASE_CREDENTIALS_JSON_PATH: ${{ github.workspace }}/firebase_credentials.json
