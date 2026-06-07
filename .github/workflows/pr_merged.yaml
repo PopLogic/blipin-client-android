@@ -49,15 +49,32 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
 
       - name: Setup Firebase
+        shell: bash
         env:
           GOOGLE_SERVICE_JSON: ${{ secrets.GOOGLE_SERVICE_JSON }}
           FIREBASE_CREDENTIALS_JSON: ${{ secrets.FIREBASE_CREDENTIALS_JSON }}
         run: |
-          mkdir -p app/src/${{ env.DEPLOY_ENV }}
-          echo "GOOGLE_SERVICE_JSON: $GOOGLE_SERVICE_JSON"
-          echo "FIREBASE_CREDENTIALS_JSON: $FIREBASE_CREDENTIALS_JSON
-          echo "$GOOGLE_SERVICE_JSON" | base64 --decode > app/src/${{ env.DEPLOY_ENV }}/google-services.json
-          echo "$FIREBASE_CREDENTIALS_JSON" | base64 --decode > firebase_credentials.json
+          set -euo pipefail
+          mkdir -p "app/src/${{ env.DEPLOY_ENV }}"
+
+          if [[ -z "${GOOGLE_SERVICE_JSON:-}" ]]; then
+          echo "Missing secret: GOOGLE_SERVICE_JSON" >&2
+          exit 1
+          fi
+          if [[ -z "${FIREBASE_CREDENTIALS_JSON:-}" ]]; then
+          echo "Missing secret: FIREBASE_CREDENTIALS_JSON" >&2
+          exit 1
+          fi
+
+          # decode google-services.json
+          echo "GOOGLE_SERVICE_JSON" | base64 --decode > "app/src/${{ env.DEPLOY_ENV }}/google-services.json"
+          [[ -s "app/src/${{ env.DEPLOY_ENV }}/google-services.json" ]] || { echo "google-services.json is empty"; exit 1; }
+          python3 -m json.tool "app/src/${{ env.DEPLOY_ENV }}/google-services.json" >/dev/null
+
+          # decode firebase credentials
+          echo "$FIREBASE_CREDENTIALS_JSON" | base64 --decode > "firebase_credentials.json"
+          [[ -s "firebase_credentials.json" ]] || { echo "firebase_credentials.json is empty"; exit 1; }
+          python3 -m json.tool "firebase_credentials.json" >/dev/null
 
       - name: Setup Android Keystore
         env:
