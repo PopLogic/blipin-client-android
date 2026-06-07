@@ -1,5 +1,7 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.io.FileInputStream
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
@@ -8,6 +10,12 @@ plugins {
     alias(libs.plugins.koin.compiler)
     id("com.google.gms.google-services")
 }
+
+// val keystoreProperties = Properties()
+// val keystorePropertiesFile = rootProject.file("key.properties")
+// if (keystorePropertiesFile.exists()) {
+//    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+// }
 
 android {
     namespace = "com.poplogic.blipin"
@@ -38,9 +46,7 @@ android {
         }
 
         create("validation") {
-            // Configure your validation signing here
-            // keyAlias, keyPassword, storeFile, storePassword, etc.
-            storeFile = file("$rootDir/keystores/validation.keystore")
+            storeFile = file("$rootDir/keystores/release.keystore")
             storePassword = System.getenv("BITRISE_SIGNING_KEY_PASSWORD")
             keyAlias = System.getenv("BITRISE_SIGNING_KEY_ALIAS")
             keyPassword = System.getenv("BITRISE_SIGNING_KEY_PASSWORD")
