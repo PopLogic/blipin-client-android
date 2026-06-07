@@ -42,7 +42,7 @@ platform :android do
       firebase_app_distribution(
         app: ENV["FIREBASE_APP_ID"],
         service_credentials_file: ENV["FIREBASE_CREDENTIALS_JSON_PATH"],
-        groups: "internal testers",
+        groups: "internal-testers",
         release_notes: "CI build from develop branch",
         apk_path: apk
       )
