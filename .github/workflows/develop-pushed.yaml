@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - develop
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -11,11 +12,12 @@ concurrency:
 
 jobs:
   build:
-    permissions:
-      contents: read
     runs-on:
       group: Blipin-Client
-
+      labels: [ self-hosted ]
+    env:
+      ANDROID_HOME: /Users/shang/Library/Android/sdk
+      PATH: ${{ env.ANDROID_HOME }}/platform-tools:${{ env.ANDROID_HOME }}/emulator:${{ env.PATH }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -32,32 +34,30 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
-      - name: Gradle build (stagingValidation)
-        run: ./gradlew assembleStagingValidation
+      - name: Setup Firebase
+        env:
+#          FIREBASE_JSON: ${{ secrets.FIREBASE_JSON }}
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: |        
+          echo "$GOOGLE_SERVICES_JSON" | base64 --decode > android/app/src/${{ env.DEPLOY_ENV }}/google-services.json
+#          echo "$FIREBASE_JSON" | base64 --decode > firebase.json
 
-      - name: Zipalign APK
+      - name: Setup Android Keystore
+        env:
+          ANDROID_KEYSTORE_PATH: ${{ github.workspace }}/keystores/android_keystore.jks
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_VALIDATION_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_VALIDATION_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_VALIDATION_KEY_PASSWORD }}
         run: |
-          $ANDROID_HOME/build-tools/34.0.0/zipalign -v 4 \
-            app/build/outputs/apk/stagingValidation/app-staging-*.apk \
-            app/build/outputs/apk/stagingValidation/app-staging-aligned.apk
+          mkdir -p keystores
+          echo "${{ secrets.ANDROID_VALIDATION_KEYSTORE_JKS }}" | base64 --decode > ${{ env.ANDROID_KEYSTORE_PATH }}
+          echo "storeFile=${{ env.ANDROID_KEYSTORE_PATH }}" > keystores/key.properties
+          echo "storePassword=${{ env.ANDROID_KEYSTORE_PASSWORD }}" >> keystores/key.properties
+          echo "keyPassword=${{ env.ANDROID_KEY_PASSWORD }}" >> keystores/key.properties
+          echo "keyAlias=${{ env.ANDROID_KEY_ALIAS }}" >> keystores/key.properties
 
-      - name: Sign APK
-        run: |
-          apksigner sign \
-            --ks ${{ secrets.SIGNING_KEYSTORE_PATH }} \
-            --ks-pass pass:${{ secrets.SIGNING_STORE_PASSWORD }} \
-            --key-pass pass:${{ secrets.SIGNING_KEY_PASSWORD }} \
-            --ks-key-alias ${{ secrets.SIGNING_KEY_ALIAS }} \
-            --out app/build/outputs/apk/stagingValidation/app-staging-signed.apk \
-            app/build/outputs/apk/stagingValidation/app-staging-aligned.apk
+      - name: Install Fastlane
+        run: bundle install
 
-      - name: Verify APK signature
-        run: apksigner verify --verbose app/build/outputs/apk/stagingValidation/app-staging-signed.apk
-
-      - name: Upload to Firebase App Distribution
-        uses: wzieba/Firebase-Distribution-Github-Action@v1
-        with:
-          appId: ${{ secrets.FIREBASE_APP_ID }}
-          serviceCredentialsFile: ${{ secrets.FIREBASE_CREDENTIALS_JSON }}
-          groups: testers
-          file: app/build/outputs/apk/stagingValidation/app-staging-signed.apk.apk
+      - name: Run Fastlane lane (AAB build + Firebase upload)
+        run: bundle exec fastlane staging_validation_aab
