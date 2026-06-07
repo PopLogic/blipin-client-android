@@ -53,6 +53,7 @@ jobs:
           GOOGLE_SERVICE_JSON: ${{ secrets.GOOGLE_SERVICE_JSON }}
           FIREBASE_CREDENTIALS_JSON: ${{ secrets.FIREBASE_CREDENTIALS_JSON }}
         run: |
+          mkdir -p app/src/${{ env.DEPLOY_ENV }}
           echo "$GOOGLE_SERVICE_JSON" | base64 --decode > app/src/${{ env.DEPLOY_ENV }}/google-services.json
           echo "$FIREBASE_CREDENTIALS_JSON" | base64 --decode > firebase_credentials.json
 
