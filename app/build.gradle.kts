@@ -11,11 +11,11 @@ plugins {
     id("com.google.gms.google-services")
 }
 
-// val keystoreProperties = Properties()
-// val keystorePropertiesFile = rootProject.file("key.properties")
-// if (keystorePropertiesFile.exists()) {
-//    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
-// }
+val keystoreProperties = Properties()
+val keystorePropertiesFile = rootProject.file("keystores/validationKey.properties")
+if (keystorePropertiesFile.exists()) {
+    FileInputStream(keystorePropertiesFile).use { keystoreProperties.load(it) }
+}
 
 android {
     namespace = "com.poplogic.blipin"
@@ -32,24 +32,25 @@ android {
     }
 
     signingConfigs {
-        getByName("debug") {
-            storeFile = file("$rootDir/keystores/debug.keystore")
-        }
+//        getByName("debug") {
+//            keyAlias = "NonRelease"
+//            keyPassword = "NonRelease"
+//            storeFile = keystoreProperties["storeFile"]?.let { file(it) }
+//            storePassword = "NonRelease"
+//        }
 
         create("release") {
-            // Configure your release signing here
-            // keyAlias, keyPassword, storeFile, storePassword, etc.
-            storeFile = file("$rootDir/keystores/release.keystore")
-            storePassword = System.getenv("BITRISE_SIGNING_KEY_PASSWORD")
-            keyAlias = System.getenv("BITRISE_SIGNING_KEY_ALIAS")
-            keyPassword = System.getenv("BITRISE_SIGNING_KEY_PASSWORD")
+            keyAlias = keystoreProperties.getProperty("keyAlias")
+            keyPassword = keystoreProperties.getProperty("keyPassword")
+            storeFile = keystoreProperties.getProperty("storeFile")?.let { file(it) }
+            storePassword = keystoreProperties.getProperty("storePassword")
         }
 
         create("validation") {
-            storeFile = file("$rootDir/keystores/release.keystore")
-            storePassword = System.getenv("BITRISE_SIGNING_KEY_PASSWORD")
-            keyAlias = System.getenv("BITRISE_SIGNING_KEY_ALIAS")
-            keyPassword = System.getenv("BITRISE_SIGNING_KEY_PASSWORD")
+            keyAlias = keystoreProperties.getProperty("keyAlias")
+            keyPassword = keystoreProperties.getProperty("keyPassword")
+            storeFile = keystoreProperties.getProperty("storeFile")?.let { file(it) }
+            storePassword = keystoreProperties.getProperty("storePassword")
         }
     }
 
@@ -138,6 +139,7 @@ dependencies {
     implementation(platform(libs.koin.bom))
     implementation(libs.koin.android)
     implementation(libs.koin.core)
+    implementation(libs.koin.annotations)
     implementation(libs.koin.annotations)
 
     // firebase dependencies

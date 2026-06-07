@@ -45,12 +45,12 @@ jobs:
       - name: Setup Android Keystore
         env:
           ANDROID_KEYSTORE_PATH: ${{ github.workspace }}/keystores/android_keystore.jks
-          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_VALIDATION_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_VALIDATION_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_VALIDATION_KEY_PASSWORD }}
         run: |
           mkdir -p keystores
-          echo "${{ secrets.ANDROID_KEYSTORE_JKS }}" | base64 --decode > ${{ env.ANDROID_KEYSTORE_PATH }}
+          echo "${{ secrets.ANDROID_VALIDATION_KEYSTORE_JKS }}" | base64 --decode > ${{ env.ANDROID_KEYSTORE_PATH }}
           echo "storeFile=${{ env.ANDROID_KEYSTORE_PATH }}" > keystores/key.properties
           echo "storePassword=${{ env.ANDROID_KEYSTORE_PASSWORD }}" >> keystores/key.properties
           echo "keyPassword=${{ env.ANDROID_KEY_PASSWORD }}" >> keystores/key.properties
