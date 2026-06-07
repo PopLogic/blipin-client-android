@@ -12,7 +12,7 @@ plugins {
 }
 
 val keystoreProperties = Properties()
-val keystorePropertiesFile = rootProject.file("keystores/validationKey.properties")
+val keystorePropertiesFile = rootProject.file("keystores/validation.properties")
 if (keystorePropertiesFile.exists()) {
     FileInputStream(keystorePropertiesFile).use { keystoreProperties.load(it) }
 }
@@ -47,9 +47,13 @@ android {
         }
 
         create("validation") {
+            val storeFilePath =
+                keystoreProperties.getProperty("storeFile")
+                    ?: error("Missing storeFile in keystores/validation.properties")
+
             keyAlias = keystoreProperties.getProperty("keyAlias")
             keyPassword = keystoreProperties.getProperty("keyPassword")
-            storeFile = keystoreProperties.getProperty("storeFile")?.let { file(it) }
+            storeFile = file(storeFilePath)
             storePassword = keystoreProperties.getProperty("storePassword")
         }
     }
@@ -139,7 +143,6 @@ dependencies {
     implementation(platform(libs.koin.bom))
     implementation(libs.koin.android)
     implementation(libs.koin.core)
-    implementation(libs.koin.annotations)
     implementation(libs.koin.annotations)
 
     // firebase dependencies
