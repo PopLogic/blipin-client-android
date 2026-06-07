@@ -10,6 +10,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  DEPLOY_ENV: staging
+
 jobs:
   build:
     runs-on:
@@ -17,7 +20,7 @@ jobs:
       labels: [ self-hosted ]
     env:
       ANDROID_HOME: /Users/shang/Library/Android/sdk
-      PATH: ${{ env.ANDROID_HOME }}/platform-tools:${{ env.ANDROID_HOME }}/emulator:${{ env.PATH }}
+      PATH: ${{ ANDROID_HOME }}/platform-tools:${{ ANDROID_HOME }}/emulator:${{ env.PATH }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
