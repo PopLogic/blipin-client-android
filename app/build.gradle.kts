@@ -47,13 +47,9 @@ android {
         }
 
         create("validation") {
-            val storeFilePath =
-                keystoreProperties.getProperty("storeFile")
-                    ?: error("Missing storeFile in keystores/validation.properties")
-
             keyAlias = keystoreProperties.getProperty("keyAlias")
             keyPassword = keystoreProperties.getProperty("keyPassword")
-            storeFile = file(storeFilePath)
+            storeFile = keystoreProperties.getProperty("storeFile")?.let { file(it) }
             storePassword = keystoreProperties.getProperty("storePassword")
         }
     }
