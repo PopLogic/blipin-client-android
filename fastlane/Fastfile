@@ -34,7 +34,7 @@ platform :android do
   lane :get_branch_last_commit do
       last_commit = `git log -1 --pretty=%B`.strip
       UI.message("Last commit message: #{last_commit}")
-      return last_commit
+      last_commit
   end
 
   desc "Build and distribute stagingValidation APK"
