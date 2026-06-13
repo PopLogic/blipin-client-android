@@ -49,7 +49,7 @@ platform :android do
       apk = Actions.lane_context[SharedValues::GRADLE_APK_OUTPUT_PATH]
       UI.user_error!("APK output path was not found after assemble.") unless apk
 
-      release = firebase_app_distribution(
+      last_release = firebase_app_distribution(
         app: ENV["FIREBASE_APP_ID"],
         service_credentials_file: ENV["FIREBASE_CREDENTIALS_JSON_PATH"],
         groups: "internal-testers-1",
@@ -57,14 +57,43 @@ platform :android do
         apk_path: apk
       )
 
+      release_notes = last_release[:releaseNotes] && last_release[:releaseNotes][:text] ? last_release[:releaseNotes][:text] : "No release notes provided."
+      display_version = last_release[:displayVersion] || "N/A"
+      build_version = last_release[:buildVersion] || "N/A"
+      testing_uri = last_release[:testingUri] || "N/A"
+
       require "json"
 
       sh(%Q(curl -sS -X POST "#{ENV["DISCORD_WEBHOOK_URL"]}" \
         -H "Content-Type: application/json" \
         -d '#{{
           username: "Github Action",
-          content: ENV["FIREBASE_APP_DISTRIBUTION_INTERNAL_TESTER_INVITATION_LINK"],
+          content: "A new alpha APK has been uploaded to Firebase App Distribution. Check it out:\n",
           avatar_url: "https://poplogic.github.io/assets/ic_launcher.png"
+          embeds: [
+            {
+              title: "Release Notes",
+              description: release_notes,
+              color: 0x00ff00,
+              fields: [
+                {
+                  name: "Display Version",
+                  value: display_version,
+                  inline: true
+                },
+                {
+                  name: "Build Version",
+                  value: build_version,
+                  inline: true
+                },
+                {
+                  name: "Testing URI",
+                  value: testing_uri,
+                  inline: false
+                }
+              ]
+            }
+          ]
         }.to_json}'))
     end
 
