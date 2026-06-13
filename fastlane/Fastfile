@@ -57,19 +57,17 @@ platform :android do
         apk_path: apk
       )
 
-      release_notes = last_release[:releaseNotes] && last_release[:releaseNotes][:text] ? last_release[:releaseNotes][:text] : "No release notes provided."
-      display_version = last_release[:displayVersion] || "N/A"
-      build_version = last_release[:buildVersion] || "N/A"
-      testing_uri = last_release[:testingUri] || "N/A"
+        release_notes = last_release && last_release[:releaseNotes] && last_release[:releaseNotes][:text] ? last_release[:releaseNotes][:text] : "No release notes provided."
+        display_version = last_release && last_release[:displayVersion] ? last_release[:displayVersion] : "N/A"
+        build_version = last_release && last_release[:buildVersion] ? last_release[:buildVersion] : "N/A"
+        testing_uri = last_release && last_release[:testingUri] ? last_release[:testingUri] : "N/A"
 
-      require "json"
+        require "json"
 
-      sh(%Q(curl -sS -X POST "#{ENV["DISCORD_WEBHOOK_URL"]}" \
-        -H "Content-Type: application/json" \
-        -d '#{{
+        payload = {
           username: "Github Action",
-          content: "A new alpha APK has been uploaded to Firebase App Distribution. Check it out:\n",
-          avatar_url: "https://poplogic.github.io/assets/ic_launcher.png"
+          content: "A new alpha APK has been uploaded to Firebase App Distribution. Check it out:",
+          avatar_url: "https://poplogic.github.io/assets/ic_launcher.png",
           embeds: [
             {
               title: "Release Notes",
@@ -78,24 +76,26 @@ platform :android do
               fields: [
                 {
                   name: "Display Version",
-                  value: display_version,
+                  value: display_version.to_s,
                   inline: true
                 },
                 {
                   name: "Build Version",
-                  value: build_version,
+                  value: build_version.to_s,
                   inline: true
                 },
                 {
                   name: "Testing URI",
-                  value: testing_uri,
+                  value: testing_uri.to_s,
                   inline: false
                 }
               ]
             }
           ]
-        }.to_json}'))
-    end
+        }
+
+        sh("curl -sS -X POST '#{ENV["DISCORD_WEBHOOK_URL"]}' -H 'Content-Type: application/json' -d '#{payload.to_json}'")
+      end
 
   desc "Deploy a new version to the Google Play"
   lane :deploy do
