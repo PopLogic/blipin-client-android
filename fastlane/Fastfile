@@ -49,13 +49,16 @@ platform :android do
       apk = Actions.lane_context[SharedValues::GRADLE_APK_OUTPUT_PATH]
       UI.user_error!("APK output path was not found after assemble.") unless apk
 
-      firebase_app_distribution(
+      release = firebase_app_distribution(
         app: ENV["FIREBASE_APP_ID"],
         service_credentials_file: ENV["FIREBASE_CREDENTIALS_JSON_PATH"],
         groups: "internal-testers-1",
         release_notes: get_branch_last_commit,
         apk_path: apk
       )
+
+      # Prefer the tester invitation URL returned by Firebase App Distribution.
+      invitation_link = release[:testing_uri] || release["testingUri"]
 
 #       discord_webhook(
 #         url: ENV["DISCORD_WEBHOOK_URL"],
@@ -67,8 +70,9 @@ platform :android do
       sh(%Q(curl -sS -X POST "#{ENV["DISCORD_WEBHOOK_URL"]}" \
         -H "Content-Type: application/json" \
         -d '#{{
-          username: "Staging Validation Bot",
-          content: "A new staging validation APK has been uploaded to Firebase App Distribution. Check it out: #{apk}"
+          username: "Github Action",
+          content: "A new staging validation APK has been uploaded to Firebase App Distribution. Check it out: \n#{invitation_link || "Invitation link unavailable"}",
+          avatar_url: "https://poplogic.github.io/assets/ic_launcher.png"
         }.to_json}'))
     end
 
