@@ -72,7 +72,7 @@ platform :android do
             {
               title: "Release Notes",
               description: release_notes,
-              color: 0x00ff00,
+              color: 0xff6600,
               fields: [
                 {
                   name: "Display Version",
