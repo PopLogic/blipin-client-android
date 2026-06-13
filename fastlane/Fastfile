@@ -57,21 +57,13 @@ platform :android do
         apk_path: apk
       )
 
-      # Prefer the tester invitation URL returned by Firebase App Distribution.
-      invitation_link = release[:testing_uri] || release["testingUri"]
-
-#       discord_webhook(
-#         url: ENV["DISCORD_WEBHOOK_URL"],
-#         username: "Staging Validation Bot",
-#         content: "A new staging validation APK has been uploaded to Firebase App Distribution. Check it out: #{apk}"
-#       )
       require "json"
 
       sh(%Q(curl -sS -X POST "#{ENV["DISCORD_WEBHOOK_URL"]}" \
         -H "Content-Type: application/json" \
         -d '#{{
           username: "Github Action",
-          content: "A new staging validation APK has been uploaded to Firebase App Distribution. Check it out: \n#{invitation_link || "Invitation link unavailable"}",
+          content: ENV["FIREBASE_APP_DISTRIBUTION_INTERNAL_TESTER_INVITATION_LINK"],
           avatar_url: "https://poplogic.github.io/assets/ic_launcher.png"
         }.to_json}'))
     end
