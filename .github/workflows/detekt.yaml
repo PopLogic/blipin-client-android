@@ -32,8 +32,26 @@ jobs:
           java -jar detekt-cli-all.jar \
             --input app/src \
             --build-upon-default-config \
-            --report txt:build/reports/detekt/detekt.txt \
-            --report sarif:build/reports/detekt/detekt.sarif
+            --report sarif:build/reports/detekt/detekt.sarif \
+            --report md:build/reports/detekt/detekt.md \
+            --report github:build/reports/detekt/detekt-github.txt
+
+      - name: Print detekt summary
+        if: always()
+        run: |
+          echo "## Detekt Report" >> "$GITHUB_STEP_SUMMARY"
+          if [ -f build/reports/detekt/detekt.md ]; then
+            cat build/reports/detekt/detekt.md >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "No markdown report generated." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload detekt reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: detekt-reports
+          path: build/reports/detekt/
 
       - name: Upload SARIF
         if: always()
