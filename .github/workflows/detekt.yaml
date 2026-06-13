@@ -1,0 +1,42 @@
+name: detekt
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - master
+      - develop
+
+jobs:
+  detekt:
+    name: Static analysis
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Download detekt
+        run: |
+          curl -sSL -o detekt-cli-all.jar https://github.com/detekt/detekt/releases/download/v1.23.8/detekt-cli-1.23.8-all.jar
+
+      - name: Run detekt
+        run: |
+          java -jar detekt-cli-all.jar \
+            --input app/src \
+            --build-upon-default-config \
+            --report txt:build/reports/detekt/detekt.txt \
+            --report sarif:build/reports/detekt/detekt.sarif
+
+      - name: Upload SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: build/reports/detekt/detekt.sarif
