@@ -10,8 +10,10 @@ on:
 
 jobs:
   build:
-    name: Validate developmentDebug
-    runs-on: ubuntu-latest
+    name: Validate Compilability and Unit Tests
+    runs-on:
+      group: Blipin-Client
+      labels: [ self-hosted ]
 
     steps:
       - name: Checkout

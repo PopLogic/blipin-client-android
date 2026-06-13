@@ -11,7 +11,9 @@ on:
 jobs:
   ktlint:
     name: Kotlin lint
-    runs-on: ubuntu-latest
+    runs-on:
+      group: Blipin-Client
+      labels: [ self-hosted ]
 
     steps:
       - name: Checkout
@@ -23,11 +25,30 @@ jobs:
           distribution: temurin
           java-version: '17'
 
+      - name: Download ktlint
+        run: |
+          curl -sSLo ktlint https://github.com/pinterest/ktlint/releases/download/1.3.1/ktlint
+          chmod +x ktlint
+
       - name: Run ktlint
-        uses: ScaCap/action-ktlint@v1.9.0
+        run: |
+          mkdir -p build/reports/ktlint
+          ./ktlint "app/src/**/*.kt" "*.kts" --reporter=plain --reporter=checkstyle,output=build/reports/ktlint/ktlint.xml
+
+      - name: Upload ktlint report
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          ktlint_version: 1.3.1
-          reporter: github-pr-review
-          level: warning
-          filter_mode: nofilter
+          name: ktlint-report
+          path: build/reports/ktlint/
+
+      - name: Job summary
+        if: always()
+        run: |
+          echo "## ktlint report" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          if [ -f build/reports/ktlint/ktlint.xml ]; then
+            echo "Check the uploaded artifact for the full report." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "No report found." >> "$GITHUB_STEP_SUMMARY"
+          fi

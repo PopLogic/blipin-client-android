@@ -11,7 +11,9 @@ on:
 jobs:
   detekt:
     name: Static analysis
-    runs-on: ubuntu-latest
+    runs-on:
+      group: Blipin-Client
+      labels: [ self-hosted ]
 
     steps:
       - name: Checkout
