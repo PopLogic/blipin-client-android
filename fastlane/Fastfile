@@ -57,11 +57,19 @@ platform :android do
         apk_path: apk
       )
 
-      discord_webhook(
-        url: ENV["DISCORD_WEBHOOK_URL"],
-        username: "Staging Validation Bot",
-        content: "A new staging validation APK has been uploaded to Firebase App Distribution. Check it out: #{apk}"
-      )
+#       discord_webhook(
+#         url: ENV["DISCORD_WEBHOOK_URL"],
+#         username: "Staging Validation Bot",
+#         content: "A new staging validation APK has been uploaded to Firebase App Distribution. Check it out: #{apk}"
+#       )
+      require "json"
+
+      sh(%Q(curl -sS -X POST "#{ENV["DISCORD_WEBHOOK_URL"]}" \
+        -H "Content-Type: application/json" \
+        -d '#{{
+          username: "Staging Validation Bot",
+          content: "A new staging validation APK has been uploaded to Firebase App Distribution. Check it out: #{apk}"
+        }.to_json}'))
     end
 
   desc "Deploy a new version to the Google Play"
@@ -77,6 +85,7 @@ platform :android do
       app: ENV["FIREBASE_APP_ID"],
       service_credentials_file: ENV["FIREBASE_CREDENTIALS_JSON_PATH"]
     )
-    increment_build_number({ build_number: latest_release[:buildVersion].to_i + 1 })
+    latest_build = latest_release && latest_release[:buildVersion] ? latest_release[:buildVersion].to_i : 0
+    increment_build_number(build_number: latest_build + 1)
   end
 end
