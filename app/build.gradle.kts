@@ -25,10 +25,23 @@ android {
         applicationId = "com.poplogic.blipin"
         minSdk = 30
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        val versionPropertiesFile = file("version.properties")
+        if (versionPropertiesFile.exists()) {
+            val versionProperties =
+                Properties().apply {
+                    load(FileInputStream(versionPropertiesFile))
+                }
+
+            val majorVersion = versionProperties.getProperty("versionMajor") ?: "0"
+            val minorVersion = versionProperties.getProperty("versionMinor") ?: "0"
+            val patchVersion = versionProperties.getProperty("versionPatch") ?: "0"
+            versionName = "$majorVersion.$minorVersion.$patchVersion"
+            versionCode =
+                majorVersion.toInt() * 10000 + minorVersion.toInt() * 100 + patchVersion.toInt()
+        }
     }
 
     signingConfigs {
@@ -88,11 +101,13 @@ android {
     productFlavors {
         create("development") {
             applicationIdSuffix = ".development"
+            versionNameSuffix = "-dev"
             dimension = "environment"
         }
 
         create("staging") {
             applicationIdSuffix = ".staging"
+            versionNameSuffix = "-staging"
             dimension = "environment"
         }
 
@@ -101,8 +116,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     buildFeatures {
         compose = true
@@ -113,7 +128,7 @@ android {
 
 tasks.withType<KotlinCompile>().configureEach {
     compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_11)
+        jvmTarget.set(JvmTarget.JVM_17)
     }
 }
 
