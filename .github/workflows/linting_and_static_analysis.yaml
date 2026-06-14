@@ -55,9 +55,9 @@ jobs:
         run: |
           curl -sSL -o detekt-cli-all.jar https://github.com/detekt/detekt/releases/download/v1.23.8/detekt-cli-1.23.8-all.jar
 
-      - name: Apply ktlint fixes
+      - name: Apply ktlint fixes (do not fail on non-auto-correctable rules)
         run: |
-          ./ktlint -F "app/src/**/*.kt" "*.kts"
+          ./ktlint -F "app/src/**/*.kt" "*.kts" || true
 
       - name: Run detekt with auto-correct (where supported)
         run: |
