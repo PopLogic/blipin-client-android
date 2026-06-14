@@ -1,4 +1,4 @@
-name: detekt
+name: code-quality
 
 on:
   pull_request:
@@ -13,8 +13,8 @@ permissions:
   pull-requests: write
 
 jobs:
-  detekt:
-    name: Static analysis
+  quality:
+    name: Ktlint + Detekt
     runs-on:
       group: Blipin-Client
       labels: [ self-hosted ]
@@ -30,11 +30,20 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: "17"
+
+      - name: Download ktlint
+        run: |
+          curl -sSLo ktlint https://github.com/pinterest/ktlint/releases/download/1.3.1/ktlint
+          chmod +x ktlint
 
       - name: Download detekt
         run: |
           curl -sSL -o detekt-cli-all.jar https://github.com/detekt/detekt/releases/download/v1.23.8/detekt-cli-1.23.8-all.jar
+
+      - name: Apply ktlint fixes
+        run: |
+          ./ktlint -F "app/src/**/*.kt" "*.kts"
 
       - name: Run detekt with auto-correct (where supported)
         run: |
@@ -47,7 +56,14 @@ jobs:
             --report md:build/reports/detekt/detekt.md \
             --report txt:build/reports/detekt/detekt.txt
 
-      - name: Commit and push detekt fixes
+      - name: Generate ktlint markdown report
+        if: always()
+        run: |
+          mkdir -p build/reports/ktlint
+          ./ktlint "app/src/**/*.kt" "*.kts" \
+            --reporter=markdown,output=build/reports/ktlint/ktlint.md
+
+      - name: Commit and push auto-fixes
         if: >
           github.event_name == 'pull_request' &&
           github.event.pull_request.head.repo.fork == false
@@ -56,22 +72,39 @@ jobs:
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git add -A
-            git commit -m "style: apply detekt auto-corrections"
+            git commit -m "style: apply ktlint/detekt auto-fixes [skip ci]"
             git push
           else
-            echo "No detekt auto-corrections to commit."
+            echo "No auto-fixes to commit."
           fi
 
-      - name: Print detekt summary
+      - name: Job summary
         if: always()
         run: |
-          echo "## Detekt Report" >> "$GITHUB_STEP_SUMMARY"
+          echo "## Code Quality Report" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
+
+          echo "### ktlint" >> "$GITHUB_STEP_SUMMARY"
+          if [ -f build/reports/ktlint/ktlint.md ]; then
+            cat build/reports/ktlint/ktlint.md >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "No ktlint markdown report generated." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "### detekt" >> "$GITHUB_STEP_SUMMARY"
           if [ -f build/reports/detekt/detekt.md ]; then
             cat build/reports/detekt/detekt.md >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "No markdown report generated." >> "$GITHUB_STEP_SUMMARY"
+            echo "No detekt markdown report generated." >> "$GITHUB_STEP_SUMMARY"
           fi
+
+      - name: Upload ktlint report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ktlint-report
+          path: build/reports/ktlint/
 
       - name: Upload detekt reports
         if: always()
