@@ -70,12 +70,13 @@ jobs:
             --report md:build/reports/detekt/detekt.md \
             --report txt:build/reports/detekt/detekt.txt
 
-      - name: Generate ktlint markdown report
+      - name: Generate ktlint report
         if: always()
         run: |
           mkdir -p build/reports/ktlint
           ./ktlint "app/src/**/*.kt" "*.kts" \
-            --reporter=markdown,output=build/reports/ktlint/ktlint.md
+            --reporter=html,output=build/reports/ktlint/ktlint.html \
+            --reporter=plain-summary
 
       - name: Commit and push auto-fixes
         if: >
@@ -99,10 +100,10 @@ jobs:
           echo "" >> "$GITHUB_STEP_SUMMARY"
 
           echo "### ktlint" >> "$GITHUB_STEP_SUMMARY"
-          if [ -f build/reports/ktlint/ktlint.md ]; then
-            cat build/reports/ktlint/ktlint.md >> "$GITHUB_STEP_SUMMARY"
+          if [ -f build/reports/ktlint/ktlint.html ]; then
+            echo "ktlint HTML report generated: download artifact \`ktlint-report\`." >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "No ktlint markdown report generated." >> "$GITHUB_STEP_SUMMARY"
+            echo "No ktlint report generated." >> "$GITHUB_STEP_SUMMARY"
           fi
 
           echo "" >> "$GITHUB_STEP_SUMMARY"
