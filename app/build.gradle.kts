@@ -35,12 +35,13 @@ android {
                     load(FileInputStream(versionPropertiesFile))
                 }
 
-            val majorVersion = versionProperties.getProperty("versionMajor") ?: "0"
-            val minorVersion = versionProperties.getProperty("versionMinor") ?: "0"
-            val patchVersion = versionProperties.getProperty("versionPatch") ?: "0"
+            val majorVersion = (versionProperties.getProperty("versionMajor") ?: "0").toInt()
+            val minorVersion = (versionProperties.getProperty("versionMinor") ?: "0").toInt()
+            val patchVersion = (versionProperties.getProperty("versionPatch") ?: "0").toInt()
+            val build = (System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull() ?: 1).coerceAtMost(999)
             versionName = "$majorVersion.$minorVersion.$patchVersion"
             versionCode =
-                majorVersion.toInt() * 10000 + minorVersion.toInt() * 100 + patchVersion.toInt()
+                majorVersion * 10_000_000 + minorVersion * 100_000 + patchVersion * 1_000 + build
         }
     }
 
