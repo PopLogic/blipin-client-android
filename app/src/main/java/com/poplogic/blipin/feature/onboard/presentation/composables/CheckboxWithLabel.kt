@@ -34,6 +34,7 @@ import com.poplogic.blipin.ui.theme.BlipinTheme
 
 @Composable
 fun CheckboxWithLabel(
+    modifier: Modifier = Modifier,
     isCheck: Boolean,
     label: @Composable () -> Unit,
     onCheckableChanged: () -> Unit,
