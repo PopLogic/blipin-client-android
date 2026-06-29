@@ -157,7 +157,11 @@ dependencies {
     implementation(libs.koin.annotations)
 
     // firebase dependencies
-    implementation(libs.firebase.bom)
+    implementation(platform(libs.firebase.bom))
+
+    // coil
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

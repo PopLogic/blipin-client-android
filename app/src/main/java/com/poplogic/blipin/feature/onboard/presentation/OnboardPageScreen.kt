@@ -2,27 +2,23 @@ package com.poplogic.blipin.feature.onboard.presentation
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicText
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -39,24 +35,19 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.LinkAnnotation
-import androidx.compose.ui.text.LinkInteractionListener
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextLinkStyles
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.withLink
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.poplogic.blipin.R
-import com.poplogic.blipin.feature.onboard.presentation.composables.CheckboxWithLabel
+import com.poplogic.blipin.feature.onboard.presentation.composables.OnboardBottomSheet
 import com.poplogic.blipin.feature.onboard.presentation.composables.OnboardPage
 import com.poplogic.blipin.feature.onboard.presentation.composables.PagerDotIndicator
 import com.poplogic.blipin.feature.onboard.presentation.viewmodel.OnboardUiModel
 import com.poplogic.blipin.feature.onboard.presentation.viewmodel.OnboardViewModel
+import com.poplogic.blipin.nav.OnNavigateToHome
+import com.poplogic.blipin.nav.OnNavigateToWebView
 import kotlinx.coroutines.launch
 
 @Suppress("ktlint:standard:function-naming")
@@ -65,6 +56,8 @@ import kotlinx.coroutines.launch
 fun OnboardPageScreen(
     modifier: Modifier = Modifier,
     viewModel: OnboardViewModel,
+    onNavigateToWebView: OnNavigateToWebView,
+    onNavigateToHome: OnNavigateToHome,
 ) {
     val uiState = viewModel.uiState.collectAsState()
     val pagerState =
@@ -81,9 +74,9 @@ fun OnboardPageScreen(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val tosCheckState = rememberSaveable { mutableStateOf(false) }
     val privacyCheckState = rememberSaveable { mutableStateOf(false) }
-    Column(
+    Box(
         modifier =
-            modifier
+            Modifier
                 .fillMaxSize()
                 .background(Brush.radialGradient(colorStops = colorStops)),
     ) {
@@ -91,240 +84,129 @@ fun OnboardPageScreen(
             state = pagerState,
             modifier =
                 Modifier
-                    .weight(0.64f),
+                    .fillMaxHeight()
+                    .windowInsetsPadding(WindowInsets.safeDrawing),
         ) { pageIndex ->
-            val tab = uiState.value.tabs[pageIndex]
-            OnboardPage(
-                title = tab.title,
-                subtitle = tab.description,
-                lottieRawRes = tab.lottieRes,
-            )
-        }
+            Column {
+                val tab = uiState.value.tabs[pageIndex]
+                OnboardPage(
+                    title = tab.title,
+                    subtitle = tab.description,
+                    lottieRawRes = tab.lottieRes,
+                    modifier = modifier.weight(.64f),
+                )
+                Spacer(modifier = modifier.weight(.083f))
 
-        Box(
-            modifier =
-                Modifier
-                    .weight(0.083f)
-                    .fillMaxWidth(),
-            contentAlignment = Alignment.Center,
-        ) {
-            PagerDotIndicator(
-                pageCount = uiState.value.tabs.size,
-                currentPage = pagerState.currentPage,
-            )
-        }
-
-        Box(
-            modifier =
-                Modifier.weight(0.277f),
-        ) {
-            Image(
-                painterResource(R.drawable.img),
-                contentDescription = "",
-                contentScale = ContentScale.FillWidth,
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.BottomStart),
-            )
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier =
-                    Modifier
-                        .align(Alignment.BottomStart)
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-            ) {
-                Spacer(Modifier.height(94.dp))
-                Button(
-                    onClick = {
-                        if (pagerState.targetPage == uiState.value.tabs.size - 1) {
-                            shouldShowBottomSheet = true
-                        } else {
-                            animationScope.launch {
-                                pagerState.animateScrollToPage(pagerState.targetPage + 1)
-                            }
-                        }
-                    },
-                    colors =
-                        ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFFFF6600),
-                            contentColor = Color.White,
-                        ),
-                    shape = RoundedCornerShape(30),
+                Box(
                     modifier =
-                        Modifier
-                            .height(48.dp)
-                            .fillMaxWidth(),
+                        Modifier.weight(0.277f),
                 ) {
-                    Text(
-                        text = uiState.value.tabs[pagerState.targetPage].buttonText,
-                        fontSize = 16.sp,
-                        lineHeight = 26.sp,
-                        fontWeight = FontWeight.W500,
-                        textAlign = TextAlign.Center,
-                        color = Color.White,
-                    )
-                }
-                Spacer(Modifier.height(24.dp))
-            }
-        }
-    }
-    if (shouldShowBottomSheet) {
-        ModalBottomSheet(
-            sheetState = sheetState,
-            onDismissRequest = {
-                shouldShowBottomSheet = false
-            },
-            dragHandle = null,
-            shape = RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp),
-            tonalElevation = 5.dp,
-        ) {
-            Column(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight()
-                        .background(Color.White),
-            ) {
-                Row(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.End,
-                ) {
-                    IconButton(
-                        onClick = {
-                            shouldShowBottomSheet = false
-                        },
+                    val bottomWaveImage =
+                        if (pageIndex == 1) R.drawable.onboarding_wave_2 else R.drawable.onboarding_wave_1
+                    Image(
+                        painterResource(bottomWaveImage),
+                        contentDescription = "",
+                        contentScale = ContentScale.FillWidth,
                         modifier =
                             Modifier
-                                .size(48.dp)
-                                .align(Alignment.CenterVertically)
+                                .fillMaxWidth()
+                                .align(Alignment.BottomStart),
+                    )
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier =
+                            Modifier
+                                .align(Alignment.BottomStart)
+                                .fillMaxWidth()
                                 .padding(horizontal = 16.dp),
                     ) {
-                        Image(
-                            painterResource(R.drawable.type_close__color_grey__size_16),
-                            contentDescription = "Close",
-                        )
-                    }
-                }
-                Column(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .height(124.dp)
-                            .padding(horizontal = 24.dp, vertical = 10.dp),
-                ) {
-                    CheckboxWithLabel(
-                        isCheck = tosCheckState.value,
-                        label =
-                            {
-                                BasicText(
-                                    buildAnnotatedString {
-                                        append("我已閱讀並同意")
-                                        withLink(
-                                            LinkAnnotation.Url(
-                                                "https://www.blipin.com/terms",
-                                                TextLinkStyles(
-                                                    style =
-                                                        SpanStyle(
-                                                            color = MaterialTheme.colorScheme.primary,
-                                                            textDecoration = TextDecoration.Underline,
-                                                        ),
-                                                ),
-                                            ),
-                                        ) {
-                                            append("服務條款")
-                                        }
-                                    },
-                                    style = MaterialTheme.typography.bodyMedium.copy(Color.Black),
-                                )
+                        Spacer(Modifier.height(94.dp))
+                        Button(
+                            onClick = {
+                                if (pagerState.targetPage == uiState.value.tabs.size - 1) {
+                                    shouldShowBottomSheet = true
+                                } else {
+                                    animationScope.launch {
+                                        pagerState.animateScrollToPage(pagerState.targetPage + 1)
+                                    }
+                                }
                             },
-                        onCheckableChanged = {
-                            tosCheckState.value = !tosCheckState.value
-                        },
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    CheckboxWithLabel(
-                        isCheck = privacyCheckState.value,
-                        label =
-                            {
-                                BasicText(
-                                    buildAnnotatedString {
-                                        append("我已閱讀並同意")
-                                        withLink(
-                                            LinkAnnotation.Url(
-                                                "https://www.blipin.com/privacy",
-                                                TextLinkStyles(
-                                                    style =
-                                                        SpanStyle(
-                                                            color = MaterialTheme.colorScheme.primary,
-                                                            textDecoration = TextDecoration.Underline,
-                                                        ),
-                                                ),
-                                                linkInteractionListener =
-                                                    object :
-                                                        LinkInteractionListener {
-                                                        override fun onClick(link: LinkAnnotation) {
-                                                        }
-                                                    },
-                                            ),
-                                        ) {
-                                            append("隱私權政策")
-                                        }
-                                    },
-                                    style = MaterialTheme.typography.bodyMedium.copy(Color.Black),
-                                )
-                            },
-                        onCheckableChanged = {
-                            privacyCheckState.value = !privacyCheckState.value
-                        },
-                    )
-                }
-                HorizontalDivider(
-                    thickness = 1.dp,
-                    color = Color(0xFFE7E7E7),
-                )
-                Spacer(modifier = Modifier.height(20.dp))
-
-                Box(modifier = Modifier.padding(horizontal = 20.dp)) {
-                    Button(
-                        onClick = {
-                            if (tosCheckState.value && privacyCheckState.value) {
-//                                viewModel.onEvent(OnboardEvent.OnCompleteOnboarding)
-                            }
-                        },
-                        colors =
-                            if (tosCheckState.value && privacyCheckState.value) {
+                            colors =
                                 ButtonDefaults.buttonColors(
                                     containerColor = Color(0xFFFF6600),
                                     contentColor = Color.White,
-                                )
-                            } else {
-                                ButtonDefaults.buttonColors(
-                                    containerColor = Color(0xFFFF6600).copy(alpha = 0.5f),
-                                    contentColor = Color.White.copy(alpha = 0.5f),
-                                )
-                            },
-                        shape = RoundedCornerShape(30),
-                        modifier =
-                            Modifier
-                                .height(48.dp)
-                                .fillMaxWidth(),
-                    ) {
-                        Text(
-                            text = uiState.value.tabs[pagerState.targetPage].buttonText,
-                            fontSize = 16.sp,
-                            lineHeight = 26.sp,
-                            fontWeight = FontWeight.W500,
-                            textAlign = TextAlign.Center,
-                            color = Color.White,
-                        )
+                                ),
+                            shape = RoundedCornerShape(30),
+                            modifier =
+                                Modifier
+                                    .height(48.dp)
+                                    .fillMaxWidth(),
+                        ) {
+                            Text(
+                                text = uiState.value.tabs[pagerState.targetPage].buttonText,
+                                fontSize = 16.sp,
+                                lineHeight = 26.sp,
+                                fontWeight = FontWeight.W500,
+                                textAlign = TextAlign.Center,
+                                color = Color.White,
+                            )
+                        }
+                        Spacer(Modifier.height(24.dp))
                     }
                 }
-                Spacer(modifier = Modifier.height(20.dp))
+            }
+        }
+
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxHeight()
+                    .background(Color.Transparent),
+        ) {
+            Spacer(modifier = Modifier.weight(0.64f))
+            Box(
+                modifier =
+                    Modifier
+                        .weight(0.083f)
+                        .fillMaxWidth(),
+                contentAlignment = Alignment.Center,
+            ) {
+                PagerDotIndicator(
+                    pageCount = uiState.value.tabs.size,
+                    currentPage = pagerState.currentPage,
+                )
+            }
+            Spacer(modifier = Modifier.weight(0.277f))
+        }
+        if (shouldShowBottomSheet) {
+            ModalBottomSheet(
+                sheetState = sheetState,
+                onDismissRequest = {
+                    shouldShowBottomSheet = false
+                },
+                dragHandle = null,
+                shape = RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp),
+                tonalElevation = 5.dp,
+            ) {
+                OnboardBottomSheet(
+                    tosCheckState = tosCheckState.value,
+                    privacyCheckState = privacyCheckState.value,
+                    onTosCheckStateToggled = {
+                        tosCheckState.value = !tosCheckState.value
+                    },
+                    onPrivacyCheckStateToggled = {
+                        privacyCheckState.value = !privacyCheckState.value
+                    },
+                    buttonText = uiState.value.tabs[pagerState.targetPage].buttonText,
+                    onDismiss = {
+                        shouldShowBottomSheet = false
+                    },
+                    onLinkClicked = onNavigateToWebView,
+                    onStartToUseClicked = {
+                        shouldShowBottomSheet = false
+                        onNavigateToHome()
+                    },
+                )
             }
         }
     }
