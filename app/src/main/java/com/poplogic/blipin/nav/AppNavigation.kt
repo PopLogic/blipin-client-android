@@ -33,7 +33,10 @@ typealias OnNavigateToWebView = (screenTitle: String, url: String) -> Unit
 typealias OnNavigateToHome = () -> Unit
 
 @Composable
-fun AppNavigation() {
+fun AppNavigation(
+    hideSystemBars: () -> Unit,
+    showSystemBars: () -> Unit,
+) {
     val navController = rememberNavController()
 
     NavHost(
@@ -41,6 +44,7 @@ fun AppNavigation() {
         startDestination = SPLASH,
     ) {
         composable(SPLASH) {
+            hideSystemBars()
             SplashScreen(
                 onNavigateToOnboard = {
                     // Prevent duplicate navigate calls from repeated splash callbacks.
@@ -55,6 +59,7 @@ fun AppNavigation() {
         }
 
         composable(HOME) {
+            showSystemBars()
             HomePageScreen()
         }
 

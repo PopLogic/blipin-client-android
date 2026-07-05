@@ -59,3 +59,19 @@ val Typography =
                 letterSpacing = 0.5.sp,
             ),
     )
+
+fun Typography.bodyMediumBold() =
+    this.bodyMedium.copy(
+        fontWeight = FontWeight.Bold,
+        fontSize = 16.sp,
+        lineHeight = 26.sp,
+        letterSpacing = 0.sp,
+    )
+
+fun Typography.bodyMediumRegular() =
+    this.bodyMedium.copy(
+        fontWeight = FontWeight.Normal,
+        fontSize = 14.sp,
+        lineHeight = 20.sp,
+        letterSpacing = 0.sp,
+    )

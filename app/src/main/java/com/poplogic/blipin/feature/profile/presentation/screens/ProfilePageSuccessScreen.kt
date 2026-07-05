@@ -1,8 +1,5 @@
 package com.poplogic.blipin.feature.profile.presentation.screens
 
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.rememberScrollableState
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -10,6 +7,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
@@ -31,16 +30,17 @@ fun ProfilePageSuccessScreen(
     birthdayString: String,
 ) {
     val horizontalPadding = dimensionResource(id = R.dimen.home_tab_horizontal_padding)
-    val scrollableState = rememberScrollableState { delta -> delta }
+    val scrollableState = rememberScrollState()
+
     Column(
         modifier =
             modifier
                 .fillMaxSize()
                 .padding(
+                    top = horizontalPadding,
                     start = horizontalPadding,
                     end = horizontalPadding,
-                    top = horizontalPadding,
-                ).scrollable(state = scrollableState, orientation = Orientation.Vertical),
+                ).verticalScroll(scrollableState),
         verticalArrangement = Arrangement.Top,
     ) {
         PageTitle("個人檔案")

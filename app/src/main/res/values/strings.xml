@@ -1,5 +1,19 @@
 <resources>
     <string name="app_name">Blipin</string>
+    <string name="food_type_hamburger">Hamburger</string>
+    <string name="food_type_pizza">Pizza</string>
+    <string name="food_type_healthy">Healthy</string>
+    <string name="food_type_brunch">Brunch</string>
+    <string name="food_type_dessert">Dessert</string>
+    <string name="food_type_soft_drink">Soft Drink</string>
+    <string name="food_type_noodle">Noodle</string>
+    <string name="food_type_fries">Fries</string>
+    <string name="food_type_seafood">Seafood</string>
+    <string name="food_type_japanese">Japanese</string>
+    <string name="food_type_korean">Korean</string>
+    <string name="food_type_street_food">Street Food</string>
+    <string name="food_type_vegan">Vegan</string>
+    <string name="food_type_bbq">BBQ</string>
     <!-- Strings used for fragments for navigation -->
     <string name="first_fragment_label">First Fragment</string>
     <string name="second_fragment_label">Second Fragment</string>
