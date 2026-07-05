@@ -6,5 +6,5 @@ data class OnboardUiModel(
     val title: String,
     val description: String,
     val buttonText: String,
-    @RawRes val lottieRes: Int,
+    @field:RawRes val lottieRes: Int,
 )
