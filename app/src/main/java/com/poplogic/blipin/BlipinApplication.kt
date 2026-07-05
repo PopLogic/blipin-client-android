@@ -1,12 +1,10 @@
 package com.poplogic.blipin
 
 import android.app.Application
-import com.poplogic.blipin.di.homeModule
-import com.poplogic.blipin.di.onboardModule
-import com.poplogic.blipin.di.profileModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.GlobalContext.startKoin
+import org.koin.ksp.generated.module
 
 class BlipinApplication : Application() {
     override fun onCreate() {
@@ -15,7 +13,7 @@ class BlipinApplication : Application() {
         startKoin {
             androidLogger()
             androidContext(this@BlipinApplication)
-            modules(onboardModule, profileModule, homeModule)
+            modules(AppModule().module)
         }
     }
 }

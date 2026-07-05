@@ -8,12 +8,21 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
+import org.koin.android.annotation.KoinViewModel
+
+@KoinViewModel
 class ExploreViewModel(
     private val connectivityUseCase: ConnectivityUseCase,
 ) : ViewModel() {
     private val _connectionStatus: StateFlow<ConnectivityState> =
         MutableStateFlow(ConnectivityState.CONNECTED)
     val connectionStatus: StateFlow<ConnectivityState> = _connectionStatus
+
+    private val _storeStatus: StateFlow<ExploreUiState> = MutableStateFlow(ExploreUiState.Loading)
+    val storeStatus: StateFlow<ExploreUiState> = _storeStatus
+
+    private val _signInStatus: StateFlow<Boolean> = MutableStateFlow(false)
+    val signInStatus: StateFlow<Boolean> = _signInStatus
 
     init {
         viewModelScope.launch {

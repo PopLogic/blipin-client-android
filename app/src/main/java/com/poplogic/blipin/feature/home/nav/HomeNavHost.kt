@@ -8,12 +8,12 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.poplogic.blipin.feature.explore.presentation.ExploreScreen
 import com.poplogic.blipin.feature.explore.presentation.ExploreViewModel
+import com.poplogic.blipin.feature.favorites.presentation.FavoritesScreen
 import com.poplogic.blipin.feature.home.presentation.HomePageTabs
 import com.poplogic.blipin.feature.profile.presentation.ProfileScreen
 import org.koin.androidx.compose.koinViewModel
@@ -42,7 +42,12 @@ fun HomeNavHost(
         }
         composable(HomePageTabs.Favorites.route) {
             Box {}
-//            FavoritesScreen()
+            FavoritesScreen(
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .padding(contentPaddingValues),
+            )
         }
         composable(HomePageTabs.Profile.route) {
             ProfileScreen(
@@ -50,7 +55,6 @@ fun HomeNavHost(
                     Modifier
                         .fillMaxSize()
                         .padding(contentPaddingValues),
-                viewModel(),
             )
         }
     }

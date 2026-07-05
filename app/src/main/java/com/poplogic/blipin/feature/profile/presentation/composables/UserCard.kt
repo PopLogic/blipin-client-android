@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -28,6 +29,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
@@ -45,70 +47,104 @@ fun UserCard(modifier: Modifier = Modifier) {
     Card(
         modifier =
             modifier
-                .height(138.dp)
-                .padding(horizontal = 20.dp, vertical = 10.dp),
+                .wrapContentHeight(),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = BlipinWhite),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
     ) {
-        Row {
-            Box(
-                modifier =
-                    Modifier
-                        .weight(60f)
-                        .background(color = Palette.Neutral.neutral50)
-                        .clip(CircleShape)
-                        .align(Alignment.CenterVertically),
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.avatar_default),
-                    contentDescription = "Default Avatar".hardcoded(),
-                    modifier = Modifier.fillMaxSize(),
-                    tint = Palette.Neutral.neutral200,
-                )
-            }
-            Spacer(modifier = Modifier.weight(10f))
-            Column(modifier = Modifier.weight(205f)) {
-                Text(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .weight(1f),
-                    text = "登入收藏你喜歡的餐車".hardcoded(),
-                    style =
-                        Typography.bodyLarge.copy(
-                            fontWeight = FontWeight.Bold,
-                            color = BlipinBlack,
-                            fontSize = 16.sp,
-                            lineHeight = 24.sp,
-                        ),
-                )
-                Text(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .weight(1f),
-                    text = "追蹤餐車出沒地點,不再錯過".hardcoded(),
-                    style =
-                        Typography.bodyMedium.copy(
-                            fontWeight = FontWeight.Normal,
-                            color = Palette.Neutral.neutral500,
-                            fontSize = 14.sp,
-                            lineHeight = 20.sp,
-                        ),
-                )
-            }
-            Spacer(modifier = Modifier.weight(20f))
-        }
-        Spacer(modifier = Modifier.height(10.dp))
-        ButtonPrimary(
-            onClick = {},
-            text = "登入/註冊".hardcoded(),
+        Column(
             modifier =
                 Modifier
-                    .height(48.dp)
-                    .fillMaxWidth(),
-        )
+                    .wrapContentHeight()
+                    .padding(horizontal = 20.dp, vertical = 10.dp),
+            verticalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Row(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(60.dp),
+            ) {
+                Box(
+                    modifier =
+                        Modifier
+                            .weight(60f)
+                            .background(color = Palette.White)
+                            .align(Alignment.CenterVertically),
+                ) {
+                    Box(
+                        modifier =
+                            Modifier
+                                .size(60.dp)
+                                .clip(CircleShape)
+                                .background(color = Palette.Neutral.neutral50),
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.avatar_default),
+                            contentDescription = "Default Avatar".hardcoded(),
+                            modifier =
+                                Modifier
+                                    .size(32.dp)
+                                    .align(Alignment.Center),
+                            tint = Palette.Neutral.neutral200,
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.weight(10f))
+                Column(
+                    modifier =
+                        Modifier
+                            .weight(205f)
+                            .padding(vertical = 8.dp),
+                    verticalArrangement = Arrangement.Center,
+                ) {
+                    Text(
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .weight(1f),
+                        text = "登入收藏你喜歡的餐車".hardcoded(),
+                        style =
+                            Typography.bodyLarge.copy(
+                                fontWeight = FontWeight.Bold,
+                                color = BlipinBlack,
+                                fontSize = 16.sp,
+                                lineHeight = 24.sp,
+                                textAlign = TextAlign.Start,
+                            ),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    Text(
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .weight(1f),
+                        text = "追蹤餐車出沒地點,不再錯過".hardcoded(),
+                        style =
+                            Typography.bodyMedium.copy(
+                                fontWeight = FontWeight.Normal,
+                                color = Palette.Neutral.neutral500,
+                                fontSize = 14.sp,
+                                lineHeight = 20.sp,
+                                textAlign = TextAlign.Start,
+                            ),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+                Spacer(modifier = Modifier.weight(20f))
+            }
+            Spacer(modifier = Modifier.height(10.dp))
+            ButtonPrimary(
+                onClick = {},
+                text = "登入/註冊".hardcoded(),
+                modifier =
+                    Modifier
+                        .height(48.dp)
+                        .fillMaxWidth(),
+            )
+        }
     }
 }
 

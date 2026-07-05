@@ -5,6 +5,8 @@ sealed class ProfileUiState {
 
     data object Error : ProfileUiState()
 
+    data object SuccessAnonymous : ProfileUiState()
+
     data class Success(
         val userName: String,
         val userEmail: String,

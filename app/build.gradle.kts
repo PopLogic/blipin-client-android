@@ -8,7 +8,6 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
-    alias(libs.plugins.koin.compiler)
     id("com.google.gms.google-services")
 }
 
@@ -132,6 +131,10 @@ tasks.withType<KotlinCompile>().configureEach {
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_17)
     }
+}
+
+ksp {
+    arg("KOIN_CONFIG_CHECK", "false") // 關閉 Koin 註解編譯期檢查
 }
 
 dependencies {

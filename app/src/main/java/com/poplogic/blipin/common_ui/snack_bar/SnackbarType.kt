@@ -3,7 +3,7 @@ package com.poplogic.blipin.common_ui.snack_bar
 import androidx.compose.material3.SnackbarDuration
 import com.poplogic.blipin.utils.hardcoded
 
-enum class SnackBarType(
+enum class SnackbarType(
     val message: String,
     val actionLabel: String? = null,
     val duration: SnackbarDuration = SnackbarDuration.Indefinite,
@@ -25,7 +25,7 @@ enum class SnackBarType(
 
     companion object {
         fun showSnackBar(
-            snackbar: SnackBarType,
+            snackbar: SnackbarType,
             onActionClick: (() -> Unit)? = null,
         ) {
             // Implement the logic to show the snackbar using the provided parameters

@@ -16,11 +16,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -30,6 +27,7 @@ import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.unit.sp
 import com.poplogic.blipin.R
 import com.poplogic.blipin.common_ui.background.ExploreTopBackground
+import com.poplogic.blipin.common_ui.snack_bar.BottomSnackbar
 import com.poplogic.blipin.common_ui.snack_bar.showNetworkIssueSnackBar
 import com.poplogic.blipin.feature.explore.presentation.sections.BrandingSection
 import com.poplogic.blipin.feature.explore.presentation.sections.FilterChipsSection
@@ -133,9 +131,7 @@ fun ExploreScreen(
         LaunchedEffect(connectivityState.value) {
             when (connectivityState.value) {
                 ConnectivityState.DISCONNECTED -> {
-                    if (snackbarHostState.currentSnackbarData == null) {
-                        showNetworkIssueSnackBar(snackbarHostState)
-                    }
+                    showNetworkIssueSnackBar(snackbarHostState)
                 }
 
                 ConnectivityState.CONNECTED -> {
@@ -158,55 +154,11 @@ fun ExploreScreen(
                         end = 16.dp,
                     ),
             snackbar = { snackbarData ->
-                Row(
-                    modifier =
-                        Modifier
-                            .dropShadow(
-                                shape = RoundedCornerShape(8.dp),
-                                shadow =
-                                    Shadow(
-                                        radius = 10.dp,
-                                        spread = 8.dp,
-                                        color = Palette.Black.copy(alpha = 0.1f),
-                                    ),
-                            ).clip(RoundedCornerShape(8.dp))
-                            .background(Palette.White)
-                            .wrapContentHeight()
-                            .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        text = snackbarData.visuals.message,
-                        modifier =
-                            Modifier
-                                .padding(horizontal = 16.dp, vertical = 12.dp)
-                                .wrapContentWidth(),
-                        style =
-                            Typography.bodyMediumRegular().copy(
-                                color = Palette.Black,
-                                fontSize = 14.sp,
-                                lineHeight = 20.sp,
-                            ),
-                    )
-                    Spacer(modifier = Modifier.weight(1f))
-                    TextButton(
-                        onClick = { snackbarData.dismiss() },
-                        modifier =
-                            Modifier
-                                .wrapContentWidth(),
-                    ) {
-                        Text(
-                            text = "關閉".hardcoded(),
-                            style =
-                                Typography.bodyMediumRegular().copy(
-                                    color = Palette.Primary.brand,
-                                    fontSize = 14.sp,
-                                    lineHeight = 20.sp,
-                                ),
-                        )
-                    }
-                }
+                BottomSnackbar(
+                    message = snackbarData.visuals.message,
+                    actionLabel = snackbarData.visuals.actionLabel,
+                    onActionClick = snackbarData::performAction,
+                )
             },
         )
     }
