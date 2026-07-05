@@ -5,6 +5,7 @@ import com.poplogic.blipin.R
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import org.koin.android.annotation.KoinViewModel
 
 val ONBOARD_TAB_DATA =
     listOf(
@@ -32,6 +33,7 @@ data class OnboardUiState(
     val tabs: List<OnboardUiModel> = ONBOARD_TAB_DATA,
 )
 
+@KoinViewModel
 class OnboardViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(OnboardUiState())
     val uiState: StateFlow<OnboardUiState> = _uiState.asStateFlow()

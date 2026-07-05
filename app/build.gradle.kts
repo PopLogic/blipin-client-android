@@ -7,7 +7,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.koin.compiler)
+    alias(libs.plugins.ksp)
     id("com.google.gms.google-services")
 }
 
@@ -133,6 +133,10 @@ tasks.withType<KotlinCompile>().configureEach {
     }
 }
 
+ksp {
+    arg("KOIN_CONFIG_CHECK", "false") // 關閉 Koin 註解編譯期檢查
+}
+
 dependencies {
 
     implementation(libs.androidx.core.ktx)
@@ -152,10 +156,15 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.activity)
 
+    // koin
     implementation(platform(libs.koin.bom))
     implementation(libs.koin.android)
     implementation(libs.koin.core)
     implementation(libs.koin.annotations)
+    ksp(libs.koin.ksp.compiler)
+    implementation(libs.insert.koin.koin.compose.viewmodel)
+    implementation(libs.koin.androidx.compose)
+    implementation(libs.koin.compose.viewmodel.navigation)
 
     // firebase dependencies
     implementation(platform(libs.firebase.bom))
