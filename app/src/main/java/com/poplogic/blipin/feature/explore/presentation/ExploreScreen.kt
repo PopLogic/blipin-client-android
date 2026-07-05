@@ -1,5 +1,6 @@
 package com.poplogic.blipin.feature.explore.presentation
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -28,6 +29,7 @@ import androidx.compose.ui.unit.sp
 import com.poplogic.blipin.R
 import com.poplogic.blipin.common_ui.background.ExploreTopBackground
 import com.poplogic.blipin.common_ui.snack_bar.BottomSnackbar
+import com.poplogic.blipin.common_ui.snack_bar.showLoginSuggestionSnackbar
 import com.poplogic.blipin.common_ui.snack_bar.showNetworkIssueSnackBar
 import com.poplogic.blipin.feature.explore.presentation.sections.BrandingSection
 import com.poplogic.blipin.feature.explore.presentation.sections.FilterChipsSection
@@ -41,6 +43,7 @@ import com.poplogic.blipin.usecase.connectivity.ConnectivityState
 import com.poplogic.blipin.utils.hardcoded
 import java.lang.Float.min
 
+@SuppressLint("FrequentlyChangingValue")
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ExploreScreen(
@@ -128,16 +131,31 @@ fun ExploreScreen(
                 }
             }
         }
-        LaunchedEffect(connectivityState.value) {
+
+        val shouldShowSnackbar by remember {
+            derivedStateOf {
+                scrollState.firstVisibleItemIndex >= 3 &&
+                    snackbarHostState.currentSnackbarData == null
+            }
+        }
+        LaunchedEffect(
+            shouldShowSnackbar,
+            connectivityState.value,
+        ) {
+//            snapshotFlow { shouldShowSnackbar }
+//                .collect { conditionMet ->
             when (connectivityState.value) {
                 ConnectivityState.DISCONNECTED -> {
                     showNetworkIssueSnackBar(snackbarHostState)
                 }
 
                 ConnectivityState.CONNECTED -> {
-                    snackbarHostState.currentSnackbarData?.dismiss()
+                    if (shouldShowSnackbar) {
+                        showLoginSuggestionSnackbar(snackbarHostState)
+                    }
                 }
             }
+//                }
         }
 
         SnackbarHost(
