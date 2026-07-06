@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.poplogic.blipin.common_ui.background.Background
 import com.poplogic.blipin.feature.home.nav.HomeNavHost
@@ -28,8 +29,11 @@ import com.poplogic.blipin.ui.theme.Typography
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun HomePageScreen(modifier: Modifier = Modifier) {
-    val navController = rememberNavController()
+fun HomePageScreen(
+    modifier: Modifier = Modifier,
+    appNavigationController: NavHostController,
+    navController: NavHostController = rememberNavController(),
+) {
     val startDestination = HomePageTabs.Explore
     var selectedDestination by rememberSaveable { mutableIntStateOf(startDestination.ordinal) }
 
@@ -53,7 +57,12 @@ fun HomePageScreen(modifier: Modifier = Modifier) {
                                     unselectedTextColor = BlipinBlack,
                                 ),
                             onClick = {
-                                navController.navigate(route = homepage.route)
+                                navController.navigate(
+                                    route = homepage.route,
+                                ) {
+                                    launchSingleTop = true
+                                    restoreState = false
+                                }
                                 selectedDestination = index
                             },
                             icon = {
@@ -69,7 +78,12 @@ fun HomePageScreen(modifier: Modifier = Modifier) {
                 }
             },
         ) { contentPadding ->
-            HomeNavHost(navController, startDestination, contentPadding)
+            HomeNavHost(
+                navController = navController,
+                startDestination = startDestination,
+                contentPaddingValues = contentPadding,
+                appNavigationController = appNavigationController,
+            )
         }
     }
 }

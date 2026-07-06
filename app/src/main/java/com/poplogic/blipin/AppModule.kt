@@ -10,7 +10,6 @@ import org.koin.core.annotation.Single
 @Module
 @ComponentScan("com.poplogic.blipin")
 class AppModule {
-
     @Single
     fun snackbarHostState(): SnackbarHostState = SnackbarHostState()
 

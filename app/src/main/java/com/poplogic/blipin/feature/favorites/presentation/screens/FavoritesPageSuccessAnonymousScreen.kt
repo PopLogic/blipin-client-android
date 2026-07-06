@@ -16,14 +16,19 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.poplogic.blipin.R
 import com.poplogic.blipin.common_ui.button.ButtonPrimary
+import com.poplogic.blipin.nav.Routes
 import com.poplogic.blipin.ui.theme.Palette
 import com.poplogic.blipin.ui.theme.Typography
 import com.poplogic.blipin.utils.hardcoded
 
 @Composable
-fun FavoritesPageSuccessAnonymousScreen(modifier: Modifier = Modifier) {
+fun FavoritesPageSuccessAnonymousScreen(
+    modifier: Modifier = Modifier,
+    appNavigationController: NavController,
+) {
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -51,7 +56,9 @@ fun FavoritesPageSuccessAnonymousScreen(modifier: Modifier = Modifier) {
         )
         Spacer(modifier = Modifier.height(10.dp))
         ButtonPrimary(
-            onClick = {},
+            onClick = {
+                appNavigationController.navigate(Routes.AUTHENTICATE)
+            },
             text = "登入/註冊".hardcoded(),
             modifier =
                 Modifier

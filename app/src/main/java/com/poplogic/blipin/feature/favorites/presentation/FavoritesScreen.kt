@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
+import androidx.navigation.NavHostController
 import com.poplogic.blipin.R
 import com.poplogic.blipin.common_ui.components.PageTitle
 import com.poplogic.blipin.feature.favorites.presentation.screens.FavoritesPageSuccessAnonymousScreen
@@ -20,6 +21,7 @@ import org.koin.androidx.compose.koinViewModel
 fun FavoritesScreen(
     modifier: Modifier = Modifier,
     viewModel: FavoritesViewModel = koinViewModel(),
+    appNavigationController: NavHostController,
 ) {
     val uiState = viewModel.uiState.collectAsState()
     val horizontalPadding = dimensionResource(id = R.dimen.home_tab_horizontal_padding)
@@ -54,6 +56,7 @@ fun FavoritesScreen(
             is FavoritesUiState.SuccessAnonymous -> {
                 FavoritesPageSuccessAnonymousScreen(
                     modifier = Modifier.weight(1f),
+                    appNavigationController = appNavigationController,
                 )
             }
         }

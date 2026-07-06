@@ -4,8 +4,10 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.runtime.remember
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.navigation.compose.rememberNavController
 import com.poplogic.blipin.nav.AppNavigation
 import com.poplogic.blipin.ui.theme.BlipinTheme
 
@@ -27,10 +29,12 @@ class MainActivity : ComponentActivity() {
 
         enableEdgeToEdge()
         setContent {
+            val appNavigationController = rememberNavController()
             BlipinTheme {
                 AppNavigation(
                     hideSystemBars = { hideSystemBars() },
                     showSystemBars = { showSystemBars() },
+                    appNavigationController = appNavigationController,
                 )
             }
         }

@@ -25,6 +25,7 @@ fun HomeNavHost(
     navController: NavHostController,
     startDestination: HomePageTabs,
     contentPaddingValues: PaddingValues,
+    appNavigationController: NavHostController,
 ) {
     val exploreViewModel: ExploreViewModel = koinViewModel<ExploreViewModel>()
     val snackbarHostState = koinInject<SnackbarHostState>()
@@ -47,6 +48,7 @@ fun HomeNavHost(
                     Modifier
                         .fillMaxSize()
                         .padding(contentPaddingValues),
+                appNavigationController = appNavigationController,
             )
         }
         composable(HomePageTabs.Profile.route) {

@@ -77,5 +77,6 @@ class Palette {
         val Alert = Color(0xFFF44336)
         val Black = BlipinBlack
         val White = BlipinWhite
+        val SplashBackground = Color(0xFFF2EFED)
     }
 }
