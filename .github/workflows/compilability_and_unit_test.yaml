@@ -40,6 +40,16 @@ jobs:
           echo "$sdk_root/platform-tools" >> "$GITHUB_PATH"
           echo "$sdk_root/emulator" >> "$GITHUB_PATH"
 
+          # Create local.properties before Gradle runs so the secrets-gradle-plugin
+          # can evaluate the project without throwing "file not found".
+          echo "sdk.dir=$sdk_root" > local.properties
+          # Create secrets.properties (primary lookup file for the secrets plugin)
+          # with a placeholder so the key resolves to an empty string in CI.
+          touch secrets.properties
+
+      - name: Clear Gradle configuration cache
+        run: rm -rf .gradle/configuration-cache
+
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
