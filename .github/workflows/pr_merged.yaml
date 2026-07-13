@@ -66,7 +66,12 @@ jobs:
         env:
           GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
         run: |
+          touch local.properties
           echo "GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY" >> local.properties
+
+
+      - name: Clear Gradle Cache
+        run: ./gradlew cleanBuildCache
 
       - name: Setup Android Keystore
         env:
