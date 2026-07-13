@@ -37,6 +37,10 @@ jobs:
           echo "$sdk_root/platform-tools" >> "$GITHUB_PATH"
           echo "$sdk_root/emulator" >> "$GITHUB_PATH"
 
+          # Create local.properties early so Gradle/secrets-gradle-plugin can
+          # evaluate the project before the Maps API key step runs.
+          echo "sdk.dir=$sdk_root" > local.properties
+
       - name: Validate Gradle wrapper
         uses: gradle/wrapper-validation-action@v1
 
@@ -62,7 +66,6 @@ jobs:
         env:
           GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
         run: |
-          touch local.properties
           echo "GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY" >> local.properties
 
       - name: Setup Android Keystore
