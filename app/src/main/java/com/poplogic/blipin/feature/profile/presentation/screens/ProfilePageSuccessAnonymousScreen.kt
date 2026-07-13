@@ -8,17 +8,19 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.poplogic.blipin.common_ui.components.ListActionTile
 import com.poplogic.blipin.common_ui.components.ListTileGap
 import com.poplogic.blipin.feature.profile.presentation.composables.UserCard
 
 @Composable
-fun ColumnScope.ProfilePageSuccessAnonymousScreen() {
+fun ColumnScope.ProfilePageSuccessAnonymousScreen(appNavigationController: NavController) {
     UserCard(
         modifier =
             Modifier
                 .fillMaxWidth()
                 .padding(0.dp),
+        appNavigationController = appNavigationController,
     )
     Spacer(modifier = Modifier.height(22.dp))
     val infos = ProfileInfoList.entries

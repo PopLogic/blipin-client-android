@@ -37,6 +37,10 @@ jobs:
           echo "$sdk_root/platform-tools" >> "$GITHUB_PATH"
           echo "$sdk_root/emulator" >> "$GITHUB_PATH"
 
+          # Create local.properties early so Gradle and the secrets-gradle-plugin
+          # can evaluate the project before any subsequent step runs.
+          echo "sdk.dir=$sdk_root" > local.properties
+
       - name: Validate Gradle wrapper
         uses: gradle/wrapper-validation-action@v1
 
@@ -57,6 +61,21 @@ jobs:
           mkdir -p app/src/${{ env.DEPLOY_ENV }}
           cat <<< "$GOOGLE_SERVICE_JSON" | base64 --decode > app/src/${{ env.DEPLOY_ENV }}/google-services.json
           cat <<< "$FIREBASE_CREDENTIALS_JSON" | base64 --decode > firebase_credentials.json
+
+      - name: Setup Map Api Key
+        env:
+          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+        run: |
+          # Write to secrets.properties — this is the primary file the
+          # secrets-gradle-plugin looks for (propertiesFileName = "secrets.properties").
+          # Writing here avoids the fallback-to-local.properties path entirely.
+          echo "GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY" > secrets.properties
+
+      - name: Clear Gradle configuration cache
+        run: |
+          # Remove any stale configuration-cache entries from previous runs
+          # that may have recorded a "local.properties not found" failure.
+          rm -rf .gradle/configuration-cache
 
       - name: Setup Android Keystore
         env:

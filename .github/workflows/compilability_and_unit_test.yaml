@@ -40,6 +40,26 @@ jobs:
           echo "$sdk_root/platform-tools" >> "$GITHUB_PATH"
           echo "$sdk_root/emulator" >> "$GITHUB_PATH"
 
+          # Create local.properties before Gradle runs so the secrets-gradle-plugin
+          # can evaluate the project without throwing "file not found".
+          echo "sdk.dir=$sdk_root" > local.properties
+          # Create secrets.properties (primary lookup file for the secrets plugin)
+          # with a placeholder so the key resolves to an empty string in CI.
+          touch secrets.properties
+
+      - name: Clear Gradle configuration cache
+        run: rm -rf .gradle/configuration-cache
+
+      - name: Setup Map Api Key
+        env:
+          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+        run: |
+          # Use the real secret when available; fall back to a non-empty placeholder
+          # so the secrets-gradle-plugin generates a valid BuildConfig field.
+          # A real key is not needed for compilation or unit tests.
+          echo "GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY:-PLACEHOLDER_FOR_CI}" > secrets.properties
+
+
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 

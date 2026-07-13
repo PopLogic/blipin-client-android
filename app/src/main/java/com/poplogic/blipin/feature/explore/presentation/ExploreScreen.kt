@@ -1,19 +1,54 @@
 package com.poplogic.blipin.feature.explore.presentation
 
 import android.annotation.SuppressLint
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.input.TextFieldState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.SearchBar
+import androidx.compose.material3.SearchBarDefaults
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarVisuals
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -26,21 +61,24 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.poplogic.blipin.R
 import com.poplogic.blipin.common_ui.background.ExploreTopBackground
 import com.poplogic.blipin.common_ui.snack_bar.BottomSnackbar
-import com.poplogic.blipin.common_ui.snack_bar.showLoginSuggestionSnackbar
+import com.poplogic.blipin.common_ui.snack_bar.LoginSuggestionSnackBarData
 import com.poplogic.blipin.common_ui.snack_bar.showNetworkIssueSnackBar
 import com.poplogic.blipin.feature.explore.presentation.sections.BrandingSection
 import com.poplogic.blipin.feature.explore.presentation.sections.FilterChipsSection
 import com.poplogic.blipin.feature.explore.presentation.sections.HotSection
 import com.poplogic.blipin.feature.explore.presentation.sections.NewStoreSection
 import com.poplogic.blipin.feature.explore.presentation.sections.exploreSection
+import com.poplogic.blipin.nav.Routes
 import com.poplogic.blipin.ui.theme.Palette
 import com.poplogic.blipin.ui.theme.Typography
 import com.poplogic.blipin.ui.theme.bodyMediumRegular
-import com.poplogic.blipin.usecase.connectivity.ConnectivityState
+import com.poplogic.blipin.usecase.connectivity.domain.ConnectivityState
 import com.poplogic.blipin.utils.hardcoded
+import kotlinx.coroutines.launch
 import java.lang.Float.min
 
 @SuppressLint("FrequentlyChangingValue")
@@ -50,9 +88,21 @@ fun ExploreScreen(
     contentPaddingValues: PaddingValues,
     viewModel: ExploreViewModel,
     snackbarHostState: SnackbarHostState,
+    appNavigationController: NavController,
+    scrollState: LazyListState = rememberLazyListState(),
 ) {
     val connectivityState = viewModel.connectionStatus.collectAsState()
-    val scrollState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
+    var customSnackbarData by remember<MutableState<LoginSuggestionSnackBarData?>> {
+        mutableStateOf(
+            null,
+        )
+    }
+    BackHandler(enabled = scrollState.firstVisibleItemScrollOffset > 0 || scrollState.firstVisibleItemIndex > 0) {
+        coroutineScope.launch {
+            scrollState.animateScrollToItem(0, 0)
+        }
+    }
 
     val headerHeightPx = with(LocalDensity.current) { 180.dp.toPx() }
 
@@ -90,6 +140,9 @@ fun ExploreScreen(
                         Modifier
                             .fillMaxWidth()
                             .height(expandedHeight),
+                    onMapButtonTapped = {
+                        appNavigationController.navigate(Routes.MAP)
+                    },
                 )
                 CompactStickyHeader(
                     scrollRatio = scrollRatio,
@@ -98,6 +151,9 @@ fun ExploreScreen(
                             .fillMaxWidth()
                             .statusBarsPadding()
                             .height(80.dp),
+                    onMapButtonTapped = {
+                        appNavigationController.navigate(Routes.MAP)
+                    },
                 )
             }
 
@@ -142,20 +198,31 @@ fun ExploreScreen(
             shouldShowSnackbar,
             connectivityState.value,
         ) {
-//            snapshotFlow { shouldShowSnackbar }
-//                .collect { conditionMet ->
             when (connectivityState.value) {
                 ConnectivityState.DISCONNECTED -> {
                     showNetworkIssueSnackBar(snackbarHostState)
+                    customSnackbarData = null
                 }
 
                 ConnectivityState.CONNECTED -> {
                     if (shouldShowSnackbar) {
-                        showLoginSuggestionSnackbar(snackbarHostState)
+                        val visuals =
+                            object : SnackbarVisuals {
+                                override val message = "登入享受更多功能"
+                                override val actionLabel = "登入/註冊"
+                                override val duration = SnackbarDuration.Indefinite
+                                override val withDismissAction = false
+                            }
+                        customSnackbarData =
+                            LoginSuggestionSnackBarData(visuals, appNavigationController)
+                        snackbarHostState.showSnackbar(
+                            message = visuals.message,
+                            actionLabel = visuals.actionLabel,
+                            duration = visuals.duration,
+                        )
                     }
                 }
             }
-//                }
         }
 
         SnackbarHost(
@@ -172,10 +239,15 @@ fun ExploreScreen(
                         end = 16.dp,
                     ),
             snackbar = { snackbarData ->
+                // Use custom snackbar data if available, otherwise use the default
+                val dataToUse = customSnackbarData ?: snackbarData
                 BottomSnackbar(
-                    message = snackbarData.visuals.message,
-                    actionLabel = snackbarData.visuals.actionLabel,
-                    onActionClick = snackbarData::performAction,
+                    message = dataToUse.visuals.message,
+                    actionLabel = dataToUse.visuals.actionLabel,
+                    onActionClick = {
+                        dataToUse.performAction()
+//                        snackbarData.dismiss()
+                    },
                 )
             },
         )
@@ -187,6 +259,7 @@ fun ExploreScreen(
 fun LargeOrangeHeader(
     scrollRatio: Float,
     modifier: Modifier = Modifier,
+    onMapButtonTapped: () -> Unit = {},
 ) {
     // Inverse alpha: 1.0 at top, 0.0 when fully scrolled
     val alpha = 1f - scrollRatio
@@ -334,10 +407,14 @@ fun LargeOrangeHeader(
                                             SearchBarDefaults.inputFieldColors(
                                                 focusedLeadingIconColor = Palette.Primary.brand,
                                                 unfocusedLeadingIconColor = Palette.Primary.brand,
+                                                focusedTrailingIconColor = Palette.Primary.brand,
+                                                unfocusedTrailingIconColor = Palette.Primary.brand,
                                                 focusedPlaceholderColor = Palette.Neutral.neutral300,
                                                 unfocusedPlaceholderColor = Palette.Neutral.neutral300,
                                                 focusedTextColor = Palette.Black,
                                                 unfocusedTextColor = Palette.Black,
+                                                focusedContainerColor = Palette.White,
+                                                unfocusedContainerColor = Palette.White,
                                             ),
                                     )
                                 },
@@ -348,10 +425,6 @@ fun LargeOrangeHeader(
                                         .weight(1f)
                                         .height(56.dp),
                                 shape = RoundedCornerShape(100.dp),
-                                colors =
-                                    SearchBarDefaults.colors(
-                                        containerColor = Palette.White,
-                                    ),
                                 tonalElevation = SearchBarDefaults.TonalElevation,
                                 shadowElevation = SearchBarDefaults.ShadowElevation,
                                 windowInsets = WindowInsets(),
@@ -361,7 +434,7 @@ fun LargeOrangeHeader(
                         Spacer(modifier = Modifier.width(8.dp))
                         IconButton(
                             onClick = {
-                                // Handle search icon click
+                                onMapButtonTapped()
                             },
                             modifier =
                                 Modifier
@@ -390,6 +463,7 @@ fun LargeOrangeHeader(
 fun CompactStickyHeader(
     scrollRatio: Float,
     modifier: Modifier = Modifier,
+    onMapButtonTapped: () -> Unit = {},
 ) {
     // Direct alpha: 0.0 at top, 1.0 when scrolled past the threshold
     val alpha = scrollRatio
@@ -476,6 +550,19 @@ fun CompactStickyHeader(
                                                     textAlign = TextAlign.Start,
                                                 )
                                             },
+                                            colors =
+                                                SearchBarDefaults.inputFieldColors(
+                                                    focusedLeadingIconColor = Palette.Primary.brand,
+                                                    unfocusedLeadingIconColor = Palette.Primary.brand,
+                                                    focusedTrailingIconColor = Palette.Primary.brand,
+                                                    unfocusedTrailingIconColor = Palette.Primary.brand,
+                                                    focusedPlaceholderColor = Palette.Neutral.neutral300,
+                                                    unfocusedPlaceholderColor = Palette.Neutral.neutral300,
+                                                    focusedTextColor = Palette.Black,
+                                                    unfocusedTextColor = Palette.Black,
+                                                    focusedContainerColor = Palette.White,
+                                                    unfocusedContainerColor = Palette.White,
+                                                ),
                                             leadingIcon = {
                                                 Icon(
                                                     modifier =
@@ -487,15 +574,6 @@ fun CompactStickyHeader(
                                                     tint = Palette.Primary.brand,
                                                 )
                                             },
-                                            colors =
-                                                SearchBarDefaults.inputFieldColors(
-                                                    focusedLeadingIconColor = Palette.Primary.brand,
-                                                    unfocusedLeadingIconColor = Palette.Primary.brand,
-                                                    focusedPlaceholderColor = Palette.Neutral.neutral300,
-                                                    unfocusedPlaceholderColor = Palette.Neutral.neutral300,
-                                                    focusedTextColor = Palette.Black,
-                                                    unfocusedTextColor = Palette.Black,
-                                                ),
                                         )
                                     },
                                     expanded = false,
@@ -518,7 +596,7 @@ fun CompactStickyHeader(
                             Spacer(modifier = Modifier.width(8.dp))
                             IconButton(
                                 onClick = {
-                                    // Handle search icon click
+                                    onMapButtonTapped()
                                 },
                                 modifier =
                                     Modifier
@@ -540,29 +618,5 @@ fun CompactStickyHeader(
                 },
             )
         }
-    }
-}
-
-@Composable
-fun FakeSearchBar(
-    backgroundColor: Color,
-    textColor: Color,
-    modifier: Modifier = Modifier,
-) {
-    Row(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .height(48.dp)
-                .background(backgroundColor, RoundedCornerShape(24.dp))
-                .padding(horizontal = 16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(Icons.Default.Search, contentDescription = "Search", tint = Color.Gray)
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(text = "搜尋...", color = textColor, fontSize = 14.sp)
-        Spacer(modifier = Modifier.weight(1f))
-        // Settings/Filter icon placeholder
-        Text(text = "⌥", color = Color.Gray, fontSize = 18.sp)
     }
 }
