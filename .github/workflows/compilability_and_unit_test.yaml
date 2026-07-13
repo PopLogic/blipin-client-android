@@ -54,10 +54,10 @@ jobs:
         env:
           GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
         run: |
-          # Write to secrets.properties — this is the primary file the
-          # secrets-gradle-plugin looks for (propertiesFileName = "secrets.properties").
-          # Writing here avoids the fallback-to-local.properties path entirely.
-          echo "GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY" > secrets.properties
+          # Use the real secret when available; fall back to a non-empty placeholder
+          # so the secrets-gradle-plugin generates a valid BuildConfig field.
+          # A real key is not needed for compilation or unit tests.
+          echo "GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY:-PLACEHOLDER_FOR_CI}" > secrets.properties
 
 
       - name: Set up Gradle
