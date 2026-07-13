@@ -135,20 +135,21 @@ tasks.withType<KotlinCompile>().configureEach {
         jvmTarget.set(JvmTarget.JVM_17)
     }
 }
-// secrets {
-//    // Optionally specify a different file name containing your secrets.
-//    // The plugin defaults to "local.properties"
-//    propertiesFileName = "secrets.properties"
-//
-//    // A properties file containing default secret values. This file can be
-//    // checked in version control.
-//    defaultPropertiesFileName = "local.properties"
-//
-//    // Configure which keys should be ignored by the plugin by providing regular expressions.
-//    // "sdk.dir" is ignored by default.
-//    ignoreList.add("keyToIgnore") // Ignore the key "keyToIgnore"
-//    ignoreList.add("sdk.*") // Ignore all keys matching the regexp "sdk.*"
-// }
+
+secrets {
+    // Optionally specify a different file name containing your secrets.
+    // The plugin defaults to "local.properties"
+    propertiesFileName = "secrets.properties"
+
+    // A properties file containing default secret values. This file can be
+    // checked in version control.
+    defaultPropertiesFileName = "local.properties"
+
+    // Configure which keys should be ignored by the plugin by providing regular expressions.
+    // "sdk.dir" is ignored by default.
+    ignoreList.add("keyToIgnore") // Ignore the key "keyToIgnore"
+    ignoreList.add("sdk.*") // Ignore all keys matching the regexp "sdk.*"
+}
 
 extensions.configure<KspExtension> {
     arg("KOIN_CONFIG_CHECK", "false") // 關閉 Koin 註解編譯期檢查
