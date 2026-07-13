@@ -50,6 +50,15 @@ jobs:
       - name: Clear Gradle configuration cache
         run: rm -rf .gradle/configuration-cache
 
+      - name: Setup Map Api Key
+        env:
+          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+        run: |
+          # Write to secrets.properties — this is the primary file the
+          # secrets-gradle-plugin looks for (propertiesFileName = "secrets.properties").
+          # Writing here avoids the fallback-to-local.properties path entirely.
+          echo "GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY" > secrets.properties
+
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
