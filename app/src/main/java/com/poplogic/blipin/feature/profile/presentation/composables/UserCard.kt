@@ -32,9 +32,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import com.poplogic.blipin.R
 import com.poplogic.blipin.common_ui.button.ButtonPrimary
+import com.poplogic.blipin.nav.Routes
 import com.poplogic.blipin.ui.theme.BlipinBlack
 import com.poplogic.blipin.ui.theme.BlipinNeutral50
 import com.poplogic.blipin.ui.theme.BlipinWhite
@@ -43,7 +45,10 @@ import com.poplogic.blipin.ui.theme.Typography
 import com.poplogic.blipin.utils.hardcoded
 
 @Composable
-fun UserCard(modifier: Modifier = Modifier) {
+fun UserCard(
+    modifier: Modifier = Modifier,
+    appNavigationController: NavController,
+) {
     Card(
         modifier =
             modifier
@@ -137,7 +142,9 @@ fun UserCard(modifier: Modifier = Modifier) {
             }
             Spacer(modifier = Modifier.height(10.dp))
             ButtonPrimary(
-                onClick = {},
+                onClick = {
+                    appNavigationController.navigate(Routes.AUTHENTICATE)
+                },
                 text = "登入/註冊".hardcoded(),
                 modifier =
                     Modifier

@@ -9,6 +9,7 @@ import androidx.navigation.compose.composable
 import com.poplogic.blipin.common_ui.WebViewScreen
 import com.poplogic.blipin.feature.authenticate.presentation.AuthenticationScreen
 import com.poplogic.blipin.feature.home.presentation.HomePageScreen
+import com.poplogic.blipin.feature.map.presentation.MapScreen
 import com.poplogic.blipin.feature.onboard.presentation.OnboardPageScreen
 import com.poplogic.blipin.feature.splash.presentation.SplashScreen
 import com.poplogic.blipin.nav.Routes.HOME
@@ -22,6 +23,7 @@ object Routes {
     const val WEB_VIEW = "webview"
     const val SPLASH = "splash"
     const val AUTHENTICATE = "authenticate"
+    const val MAP = "map"
 }
 
 typealias OnNavigateToWebView = (screenTitle: String, url: String) -> Unit
@@ -39,7 +41,11 @@ fun AppNavigation(
     ) {
         composable(Routes.AUTHENTICATE) {
             hideSystemBars()
-            AuthenticationScreen()
+            AuthenticationScreen(appNavigationController = appNavigationController)
+        }
+        composable(Routes.MAP) {
+            hideSystemBars()
+            MapScreen()
         }
 
         composable(SPLASH) {

@@ -1,9 +1,12 @@
 package com.poplogic.blipin.feature.home.nav
 
-import androidx.compose.foundation.layout.Box
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
@@ -26,6 +29,9 @@ fun HomeNavHost(
     startDestination: HomePageTabs,
     contentPaddingValues: PaddingValues,
     appNavigationController: NavHostController,
+    exploreListState: LazyListState,
+    favoritesScrollState: ScrollState,
+    profileScrollState: ScrollState,
 ) {
     val exploreViewModel: ExploreViewModel = koinViewModel<ExploreViewModel>()
     val snackbarHostState = koinInject<SnackbarHostState>()
@@ -33,22 +39,28 @@ fun HomeNavHost(
         navController = navController,
         startDestination = startDestination.route,
         modifier = Modifier,
+        enterTransition = { EnterTransition.None },
+        exitTransition = { ExitTransition.None },
+        popEnterTransition = { EnterTransition.None },
+        popExitTransition = { ExitTransition.None },
     ) {
         composable(HomePageTabs.Explore.route) {
             ExploreScreen(
                 contentPaddingValues,
                 viewModel = exploreViewModel,
                 snackbarHostState = snackbarHostState,
+                appNavigationController = appNavigationController,
+                scrollState = exploreListState,
             )
         }
         composable(HomePageTabs.Favorites.route) {
-            Box {}
             FavoritesScreen(
                 modifier =
                     Modifier
                         .fillMaxSize()
                         .padding(contentPaddingValues),
                 appNavigationController = appNavigationController,
+                scrollState = favoritesScrollState,
             )
         }
         composable(HomePageTabs.Profile.route) {
@@ -57,6 +69,8 @@ fun HomeNavHost(
                     Modifier
                         .fillMaxSize()
                         .padding(contentPaddingValues),
+                appNavigationController = appNavigationController,
+                scrollState = profileScrollState,
             )
         }
     }

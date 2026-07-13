@@ -1,5 +1,6 @@
 package com.poplogic.blipin.feature.favorites.presentation
 
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,10 +23,10 @@ fun FavoritesScreen(
     modifier: Modifier = Modifier,
     viewModel: FavoritesViewModel = koinViewModel(),
     appNavigationController: NavHostController,
+    scrollState: ScrollState = rememberScrollState(),
 ) {
     val uiState = viewModel.uiState.collectAsState()
     val horizontalPadding = dimensionResource(id = R.dimen.home_tab_horizontal_padding)
-    val scrollableState = rememberScrollState()
 
     Column(
         modifier =
@@ -35,7 +36,7 @@ fun FavoritesScreen(
                     top = horizontalPadding,
                     start = horizontalPadding,
                     end = horizontalPadding,
-                ).verticalScroll(scrollableState),
+                ).verticalScroll(scrollState),
         verticalArrangement = Arrangement.Top,
     ) {
         PageTitle("收藏".hardcoded())

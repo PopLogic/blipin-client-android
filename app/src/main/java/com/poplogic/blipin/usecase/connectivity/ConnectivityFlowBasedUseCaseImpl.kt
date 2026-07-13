@@ -2,16 +2,17 @@ package com.poplogic.blipin.usecase.connectivity
 
 import android.net.ConnectivityManager
 import android.net.Network
+import com.poplogic.blipin.usecase.connectivity.domain.ConnectivityState
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.Factory
 
-@Factory(binds = [ConnectivityUseCase::class])
-class ConnectivityUseCaseImpl(
+@Factory(binds = [ConnectivityFlowBasedUseCase::class])
+class ConnectivityFlowBasedUseCaseImpl(
     private val connectivityManager: ConnectivityManager,
-) : ConnectivityUseCase {
+) : ConnectivityFlowBasedUseCase {
     override fun invoke(param: Unit): Flow<ConnectivityState> =
         callbackFlow {
             val networkCallback =

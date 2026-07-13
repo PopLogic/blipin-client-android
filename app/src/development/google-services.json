@@ -12,7 +12,12 @@
           "package_name": "com.poplogic.blipin.development"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "223514493620-4nqrihmolgsv3spkdsp1qd4cbofv1k53.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyB29vR4tkv602plgEaX2ME26EQa1Q17oR0"
@@ -20,7 +25,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "223514493620-4nqrihmolgsv3spkdsp1qd4cbofv1k53.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
