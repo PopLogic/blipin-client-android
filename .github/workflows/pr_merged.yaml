@@ -65,12 +65,24 @@ jobs:
       - name: Clear Gradle Cache
         run: ./gradlew cleanBuildCache
 
-      #      - name: Setup Map Api Key
-      #        env:
-      #          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
-      #        run: |
-      #          touch local.properties
-      #          echo "GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY" >> local.properties
+      - name: Create local.properties
+        env:
+          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+        run: |
+          cat > "$GITHUB_WORKSPACE/local.properties" <<EOF
+          sdk.dir=$ANDROID_SDK_ROOT
+          GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY
+          EOF
+          
+          echo "=== pwd ==="
+          pwd
+          
+          echo "=== workspace ==="
+          echo "$GITHUB_WORKSPACE"
+          
+          echo "=== local.properties ==="
+          ls -l "$GITHUB_WORKSPACE/local.properties"
+          cat "$GITHUB_WORKSPACE/local.properties"
 
       - name: Setup Android Keystore
         env:
