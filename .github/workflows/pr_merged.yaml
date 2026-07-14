@@ -69,7 +69,8 @@ jobs:
           # Write to secrets.properties — this is the primary file the
           # secrets-gradle-plugin looks for (propertiesFileName = "secrets.properties").
           # Writing here avoids the fallback-to-local.properties path entirely.
-          echo "GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY" > secrets.properties
+          touch local.properties
+          echo "GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY" > local.properties
 
       - name: Clear Gradle configuration cache
         run: |
