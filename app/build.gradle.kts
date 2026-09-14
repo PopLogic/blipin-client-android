@@ -9,8 +9,11 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
+    id("io.ktor.plugin") version "3.5.2"
     id("com.google.gms.google-services")
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.2.20"
+    id("kotlin-parcelize")
 }
 
 val keystoreProperties = Properties()
@@ -48,12 +51,12 @@ android {
     }
 
     signingConfigs {
-//        getByName("debug") {
-//            keyAlias = "NonRelease"
-//            keyPassword = "NonRelease"
-//            storeFile = keystoreProperties["storeFile"]?.let { file(it) }
-//            storePassword = "NonRelease"
-//        }
+        getByName("debug") {
+            keyAlias = "DevelopmentKey"
+            keyPassword = "tyuiGHJKbnm,.!01224"
+            storeFile = file("../keystores/Development.jks")
+            storePassword = "tyuiGHJKbnm,.!01224"
+        }
 
         create("release") {
             keyAlias = keystoreProperties.getProperty("keyAlias")
@@ -155,8 +158,35 @@ extensions.configure<KspExtension> {
     arg("KOIN_CONFIG_CHECK", "false") // 關閉 Koin 註解編譯期檢查
 }
 
-dependencies {
+ktor {
+    openApi {
+        enabled = true
+        codeInferenceEnabled = true
+        onlyCommented = false
+    }
+}
 
+dependencies {
+    implementation(projects.common.base)
+
+    implementation(projects.feature.common)
+
+    implementation(projects.domain.common)
+    implementation(projects.domain.auth)
+    implementation(projects.domain.user)
+    implementation(projects.domain.location)
+    implementation(projects.domain.connectivity)
+
+    implementation(projects.data.token)
+    implementation(projects.data.user)
+    implementation(projects.data.auth)
+
+    implementation(projects.api.user)
+    implementation(projects.api.auth)
+    implementation(projects.api.common)
+    implementation(projects.api.token)
+
+    implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -174,6 +204,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.activity)
     implementation(libs.compose.material.icons)
+    implementation(libs.kotlinx.datetime)
 
     // koin
     implementation(platform(libs.koin.bom))
@@ -203,6 +234,22 @@ dependencies {
     implementation(libs.secrets.gradle.plugin)
     implementation(libs.play.services.maps.v1820)
     implementation(libs.maps.compose)
+
+    // ktor
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.cio)
+    implementation(libs.ktor.client.auth)
+    implementation(libs.ktor.client.logging)
+    implementation(libs.ktor.server.routing.openapi)
+
+    // dataStore
+    implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.datastore)
+
+    // serialization
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.serialization.kotlinx.json)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

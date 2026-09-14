@@ -1,0 +1,5 @@
+dateLibrary: "kotlinx-datetime"
+serializationLibrary: "kotlinx_serialization"
+typeMappings:
+  UUID: "kotlin.String"
+  uuid: "kotlin.String"

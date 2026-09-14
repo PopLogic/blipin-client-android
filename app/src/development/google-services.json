@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "223514493620-ncsrlkhgn0j5lel1vp9d467ppngvvkna.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.poplogic.blipin.development",
+            "certificate_hash": "f7a1d54aa596c1eec8b0f291cd75a2a1fd7fe4c0"
+          }
+        },
+        {
           "client_id": "223514493620-4nqrihmolgsv3spkdsp1qd4cbofv1k53.apps.googleusercontent.com",
           "client_type": 3
         }

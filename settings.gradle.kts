@@ -19,5 +19,22 @@ dependencyResolutionManagement {
     }
 }
 
+@Suppress("UnstableApiUsage")
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+
 rootProject.name = "Blipin"
 include(":app")
+include(":api:auth")
+include(":api:user")
+include(":common:base")
+include(":api:token")
+include(":api:common")
+include(":data:user")
+include(":domain:user")
+include(":domain:auth")
+include(":domain:common")
+include(":data:token")
+include(":data:auth")
+include(":domain:location")
+include(":domain:connectivity")
+include(":feature:common")
