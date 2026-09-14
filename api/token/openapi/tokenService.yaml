@@ -1,0 +1,132 @@
+openapi: 3.0.3
+info:
+  title: Token Service API
+  version: 1.0.0
+  description: |
+    Token lifecycle endpoints currently implemented by the blipin backend.
+    This contract reflects the actual Gin handler behavior for refresh-token rotation.
+servers:
+  - url: http://localhost:8080
+paths:
+  /token/renew_access_token:
+    post:
+      tags:
+        - Token
+      summary: Renew access token using refresh token
+      description: |
+        Verifies a refresh token, validates the persisted session, and rotates the refresh token before issuing a new access token.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RenewAccessTokenRequest"
+      responses:
+        "200":
+          description: Token renewal succeeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RenewAccessTokenResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          description: Refresh token is invalid, expired, blocked, or mismatched against the stored session.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /token/revoke:
+    post:
+      tags:
+        - Token
+      summary: Revoke the current session token
+      description: |
+        Deletes the session associated with the authenticated token payload to invalidate the refresh-token session.
+      security:
+        - bearerAuth: [ ]
+      responses:
+        "200":
+          description: Token revoked successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RevokeTokenResponse"
+        "401":
+          description: Authorization token missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+components:
+  responses:
+    BadRequest:
+      description: Missing or malformed JSON / request body.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    InternalServerError:
+      description: Server-side processing failure while retrieving or updating the session.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+
+    RenewAccessTokenRequest:
+      type: object
+      properties:
+        refresh_token:
+          type: string
+          description: Valid refresh JWT issued to the user.
+      required:
+        - refresh_token
+
+    RenewAccessTokenResponse:
+      type: object
+      properties:
+        access_token:
+          type: string
+        access_token_expires_at:
+          type: string
+          format: date-time
+        refresh_token:
+          type: string
+          description: Rotated refresh token.
+        refresh_token_expires_at:
+          type: string
+          format: date-time
+      required:
+        - access_token
+        - access_token_expires_at
+        - refresh_token
+        - refresh_token_expires_at
+
+    RevokeTokenResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: token revoked successfully
+      required:
+        - status
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

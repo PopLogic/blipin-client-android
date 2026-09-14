@@ -1,0 +1,21 @@
+{
+  "version": 3,
+  "artifactType": {
+    "type": "APK",
+    "kind": "Directory"
+  },
+  "applicationId": "com.poplogic.blipin.development",
+  "variantName": "developmentDebug",
+  "elements": [
+    {
+      "type": "SINGLE",
+      "filters": [],
+      "attributes": [],
+      "versionCode": 100001,
+      "versionName": "0.1.0-dev",
+      "outputFile": "app-development-debug.apk"
+    }
+  ],
+  "elementType": "File",
+  "minSdkVersionForDexing": 30
+}

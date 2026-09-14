@@ -1,0 +1,437 @@
+openapi: 3.0.3
+info:
+  title: Auth Service API
+  version: 1.0.0
+  description: |
+    Authentication endpoints currently exposed by the blipin backend.
+    This document mirrors the implementation in the Gin handlers as of the current codebase.
+servers:
+  - url: http://localhost:8080
+paths:
+  /auth/google:
+    post:
+      tags:
+        - Auth
+      summary: Google OAuth login
+      description: Validates a Google ID token and creates or reuses the user identity.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GoogleLoginRequest"
+      responses:
+        "200":
+          description: Login or signup succeeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GoogleLoginResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          description: Invalid Google ID token.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: The email already exists with email/password login.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /auth/apple:
+    post:
+      tags:
+        - Auth
+      summary: Apple login
+      description: |
+        This endpoint is currently a stub and returns a success message without real Apple authentication.
+        It is intentionally included here as a draft/TODO endpoint to match the current implementation.
+      x-draft: true
+      responses:
+        "200":
+          description: Apple login stub response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Apple login successful
+                required:
+                  - message
+
+  /auth/email/login:
+    post:
+      tags:
+        - Auth
+      summary: Login with email and return whether the user is new
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmailLoginRequest"
+      responses:
+        "200":
+          description: Email login flow resolved successfully. Existing users receive is_new_user=false and new users receive is_new_user=true.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmailLoginResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "429":
+          description: Too many resend requests. Wait 60 seconds before requesting a new verification email.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /auth/email/verify:
+    post:
+      tags:
+        - Auth
+      summary: Verify email OTP and activate account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VerifyEmailRequest"
+      responses:
+        "200":
+          description: Verification succeeded and session tokens were created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VerifyEmailResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          description: Invalid or expired verification code.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  responses:
+    BadRequest:
+      description: The request payload or parameters are invalid.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    InternalServerError:
+      description: Server processing error.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Human-readable error message.
+      required:
+        - error
+
+    GoogleLoginRequest:
+      type: object
+      properties:
+        id_token:
+          type: string
+          description: Google-issued ID token.
+      required:
+        - id_token
+
+    EmailLoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+      required:
+        - email
+
+    EmailLoginResponse:
+      type: object
+      properties:
+        is_new_user:
+          type: boolean
+          example: false
+      required:
+        - is_new_user
+
+    VerifyEmailRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        code:
+          type: string
+          minLength: 6
+          maxLength: 6
+          description: 6-digit verification code.
+      required:
+        - email
+        - code
+
+    EmailAvailabilityResponse:
+      type: object
+      properties:
+        is_available:
+          type: boolean
+          example: true
+      required:
+        - is_available
+
+    GoogleLoginResponse:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+        user_identity:
+          $ref: "#/components/schemas/UserIdentity"
+        access_token:
+          type: string
+        refresh_token:
+          type: string
+        access_token_expires_at:
+          type: string
+          format: date-time
+        refresh_token_expires_at:
+          type: string
+          format: date-time
+        session_id:
+          type: string
+          format: uuid
+        is_first_time_login:
+          type: boolean
+      required:
+        - user
+        - user_identity
+        - access_token
+        - refresh_token
+        - access_token_expires_at
+        - refresh_token_expires_at
+        - session_id
+        - is_first_time_login
+
+    VerifyEmailResponse:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+        access_token:
+          type: string
+        refresh_token:
+          type: string
+        access_token_expires_at:
+          type: string
+          format: date-time
+        refresh_token_expires_at:
+          type: string
+          format: date-time
+        session_id:
+          type: string
+          format: uuid
+      required:
+        - user
+        - access_token
+        - refresh_token
+        - access_token_expires_at
+        - refresh_token_expires_at
+        - session_id
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        display_name:
+          type: string
+          nullable: true
+        avatar_url:
+          type: string
+          nullable: true
+        birthdate:
+          type: string
+          format: date
+          nullable: true
+          description: String date in YYYY-MM-DD or RFC3339, stored as a date field.
+        gender:
+          type: string
+          nullable: true
+          enum: [ male, female, other ]
+          description: Nullable gender value. When unset, the API returns null.
+        status:
+          type: string
+          enum: [ active, inactive, suspended, deleted ]
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        deleted_at:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+        - id
+        - display_name
+        - avatar_url
+        - birthdate
+        - gender
+        - status
+        - created_at
+        - updated_at
+        - deleted_at
+
+    UserIdentity:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        user_id:
+          type: integer
+          format: int64
+        provider:
+          type: string
+          enum: [ google, apple, local_email ]
+        provider_sub:
+          type: string
+        provider_email:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - user_id
+        - provider
+        - provider_sub
+        - provider_email
+        - created_at
+        - updated_at
+
+    EmailCredential:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        email:
+          type: string
+        email_verified_at:
+          type: string
+          format: date-time
+          nullable: true
+        user_id:
+          type: integer
+          format: int64
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - email
+        - email_verified_at
+        - user_id
+        - created_at
+        - updated_at
+
+    Session:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        user_id:
+          type: integer
+          format: int64
+        refresh_token:
+          type: string
+        user_agent:
+          type: string
+        client_ip:
+          type: string
+        is_blocked:
+          type: boolean
+        expires_at:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - user_id
+        - refresh_token
+        - user_agent
+        - client_ip
+        - is_blocked
+        - expires_at
+        - created_at
+        - updated_at
+
+    VerifyEmail:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        user_id:
+          type: integer
+          format: int64
+        email:
+          type: string
+        code:
+          type: string
+        expires_at:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - user_id
+        - email
+        - code
+        - expires_at
+        - created_at

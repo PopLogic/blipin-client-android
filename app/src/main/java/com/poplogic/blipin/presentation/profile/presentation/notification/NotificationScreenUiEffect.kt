@@ -1,0 +1,3 @@
+package com.poplogic.blipin.presentation.profile.presentation.notification
+
+sealed interface NotificationScreenUiEffect

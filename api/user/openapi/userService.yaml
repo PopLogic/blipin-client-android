@@ -1,0 +1,179 @@
+openapi: 3.0.3
+info:
+  title: User Service API
+  version: 1.0.0
+  description: |
+    User profile endpoints protected by bearer token authentication.
+    These routes are implemented in the Gin API and require an Authorization: Bearer <token> header.
+servers:
+  - url: http://localhost:8080
+security:
+  - BearerAuth: [ ]
+paths:
+  /user:
+    get:
+      tags:
+        - User
+      summary: Get current user profile
+      description: Fetches the authenticated user's profile based on the JWT payload.
+      security:
+        - BearerAuth: [ ]
+      responses:
+        "200":
+          description: User profile returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetUserProfileResponse"
+        "401":
+          description: Authorization header is missing, malformed, or token is invalid/expired.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Failed to fetch user.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    patch:
+      tags:
+        - User
+      summary: Update current user profile
+      description: |
+        Applies a JSON Merge Patch to the authenticated user's profile.
+        Include only fields you want to change. Set a field to null to clear it.
+        Supported fields are display_name, birthdate, and gender.
+        Birthdate accepts YYYY-MM-DD or RFC3339 and gender must be male, female, or other.
+      security:
+        - BearerAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/merge-patch+json:
+            schema:
+              $ref: "#/components/schemas/UpdateUserProfileRequest"
+      responses:
+        "200":
+          description: Profile updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdateUserProfileResponse"
+        "400":
+          description: Request body is invalid or birthdate/gender validation fails.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authorization header is missing, malformed, or token is invalid/expired.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Failed to update profile.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        display_name:
+          type: string
+          nullable: true
+        avatar_url:
+          type: string
+          nullable: true
+        birthdate:
+          type: string
+          format: date
+          nullable: true
+        gender:
+          type: string
+          nullable: true
+          enum: [ male, female, other ]
+          description: Nullable gender value. When unset, the API returns null.
+        status:
+          type: string
+          enum: [ active, inactive, suspended, deleted ]
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        deleted_at:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+        - id
+        - display_name
+        - avatar_url
+        - birthdate
+        - gender
+        - status
+        - created_at
+        - updated_at
+        - deleted_at
+
+    GetUserProfileResponse:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+      required:
+        - user
+
+    UpdateUserProfileRequest:
+      type: object
+      properties:
+        display_name:
+          type: string
+          nullable: true
+          description: Display name to set. Use null to clear it.
+        birthdate:
+          type: string
+          nullable: true
+          description: Birthdate in YYYY-MM-DD or RFC3339 format. Use null to clear it.
+        gender:
+          type: string
+          nullable: true
+          enum: [ male, female, other ]
+          description: Gender value. Matching is case-insensitive in the implementation. Use null to clear it.
+      additionalProperties: false
+
+    UpdateUserProfileResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Profile updated successfully
+        user:
+          $ref: "#/components/schemas/User"
+      required:
+        - message
+        - user
